@@ -1,0 +1,89 @@
+-- Find selective schools that admit less wealthy candidates
+SELECT
+  INSTNM
+  , ADM_RATE_ALL
+  , FIRST_GEN
+  , MD_FAMINC
+  , MD_EARN_WNE_P10
+  , SAT_AVG
+FROM
+  ch03.college_scorecard
+WHERE
+  ADM_RATE_ALL != 'PrivacySuppressed'
+  AND FIRST_GEN != 'PrivacySuppressed'
+  AND CAST(SAT_AVG AS FLOAT64) > 1300
+  AND CAST(ADM_RATE_ALL AS FLOAT64) < 0.2
+  AND CAST(FIRST_GEN AS FLOAT64) > 0.1
+ORDER BY
+  CAST(MD_FAMINC AS FLOAT64) ASC
+
+
+-- With edited schema
+SELECT
+  INSTNM
+  , ADM_RATE_ALL
+  , FIRST_GEN
+  , MD_FAMINC
+  , MD_EARN_WNE_P10
+  , SAT_AVG
+FROM
+  `ch03.college_scorecard`
+WHERE
+  SAT_AVG > 1300
+  AND ADM_RATE_ALL < 0.2
+  AND FIRST_GEN > 0.1
+ORDER BY
+  MD_FAMINC ASC
+
+
+-- etl from GCS (1)
+SELECT
+  MAX(CAST(SAT_AVG AS FLOAT64)) AS MAX_SAT_AVG
+FROM
+  `ch03.college_scorecard_gcs`
+
+-- etl from GCS (2)
+with etl_data AS (
+  SELECT
+   IF (SAT_AVG != 'NULL', CAST(SAT_AVG AS FLOAT64), NULL) AS SAT_AVG
+  FROM
+   `ch03.college_scorecard_gcs`
+)
+SELECT
+  MAX(SAT_AVG) AS MAX_SAT_AVG
+FROM
+  etl_data
+
+
+-- etl from GCS (3)
+CREATE TEMP FUNCTION cleanup_numeric(x STRING) AS
+(
+  IF ( x != 'NULL' AND x != 'PrivacySuppressed', 
+       CAST(x as FLOAT64), 
+       NULL )
+);
+
+WITH etl_data AS (
+   SELECT
+     INSTNM
+     , cleanup_numeric(ADM_RATE_ALL) AS ADM_RATE_ALL
+     , cleanup_numeric(FIRST_GEN) AS FIRST_GEN
+     , cleanup_numeric(MD_FAMINC) AS MD_FAMINC
+     , cleanup_numeric(SAT_AVG) AS SAT_AVG
+     , cleanup_numeric(MD_EARN_WNE_P10) AS MD_EARN_WNE_P10
+   FROM
+     `ch03.college_scorecard_gcs`
+)
+
+SELECT
+  *
+FROM
+  etl_data
+WHERE
+  SAT_AVG  > 1300
+  AND ADM_RATE_ALL < 0.2
+  AND FIRST_GEN > 0.1
+ORDER BY
+  MD_FAMINC ASC
+LIMIT 10
+
