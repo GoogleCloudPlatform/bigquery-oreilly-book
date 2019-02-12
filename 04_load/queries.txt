@@ -7,7 +7,7 @@ SELECT
   , MD_EARN_WNE_P10
   , SAT_AVG
 FROM
-  ch03.college_scorecard
+  ch04.college_scorecard
 WHERE
   ADM_RATE_ALL != 'PrivacySuppressed'
   AND FIRST_GEN != 'PrivacySuppressed'
@@ -27,7 +27,7 @@ SELECT
   , MD_EARN_WNE_P10
   , SAT_AVG
 FROM
-  `ch03.college_scorecard`
+  `ch04.college_scorecard`
 WHERE
   SAT_AVG > 1300
   AND ADM_RATE_ALL < 0.2
@@ -40,14 +40,14 @@ ORDER BY
 SELECT
   MAX(CAST(SAT_AVG AS FLOAT64)) AS MAX_SAT_AVG
 FROM
-  `ch03.college_scorecard_gcs`
+  `ch04.college_scorecard_gcs`
 
 -- etl from GCS (2)
 with etl_data AS (
   SELECT
    IF (SAT_AVG != 'NULL', CAST(SAT_AVG AS FLOAT64), NULL) AS SAT_AVG
   FROM
-   `ch03.college_scorecard_gcs`
+   `ch04.college_scorecard_gcs`
 )
 SELECT
   MAX(SAT_AVG) AS MAX_SAT_AVG
@@ -72,7 +72,7 @@ WITH etl_data AS (
      , cleanup_numeric(SAT_AVG) AS SAT_AVG
      , cleanup_numeric(MD_EARN_WNE_P10) AS MD_EARN_WNE_P10
    FROM
-     `ch03.college_scorecard_gcs`
+     `ch04.college_scorecard_gcs`
 )
 
 SELECT

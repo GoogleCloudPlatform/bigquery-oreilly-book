@@ -3,8 +3,8 @@
 LOC="--location US"
 INPUT=gs://bigquery-oreilly-book/college_scorecard.csv
 
-bq $LOC mk ch03 # okay if it fails
-bq $LOC rm ch03.college_scorecard_gcs # replace
+bq $LOC mk ch04 # okay if it fails
+bq $LOC rm ch04.college_scorecard_gcs # replace
 
 DEF=/tmp/college_scorecard_def.json
 
@@ -22,5 +22,5 @@ bq $LOC \
   > $DEF
 
 
-bq mk --external_table_definition=$DEF ch03.college_scorecard_gcs
+bq mk --external_table_definition=$DEF ch04.college_scorecard_gcs
 

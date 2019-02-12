@@ -60,7 +60,7 @@ FROM example
 SELECT
   gender, tripduration
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
 WHERE (tripduration < 600 AND gender = 'female') OR gender = 'male'
 
 WITH example AS (
@@ -154,6 +154,21 @@ SELECT
   , LOWER(city) AS lower
   , STRPOS(city, 'or') AS orpos
 FROM example
+
+
+WITH example AS (
+  SELECT 'armin@abc.com' AS email, 'Anapolis, MD' as city
+  UNION ALL SELECT 'boyan@bca.com', 'Boulder, CA'
+  UNION ALL SELECT 'carrie@cab.com', 'Chicago, IL'
+)
+
+SELECT 
+  CONCAT(
+     SUBSTR(email, 1, STRPOS(email, '@') - 1), -- username
+     ' from ', city) AS callers
+FROM example
+
+
 
 WITH example AS (
   SELECT * from unnest([

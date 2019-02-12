@@ -5,15 +5,21 @@
 SELECT
   gender, tripduration
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
 LIMIT 5
 
+-- backtick only around project
+SELECT
+  gender, tripduration
+FROM
+  `bigquery-public-data`.new_york_citibike.citibike_trips
+LIMIT 5
 
 -- Aliasing column names
 SELECT
   gender, tripduration AS rental_duration
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
 LIMIT 5
 
 
@@ -21,7 +27,7 @@ LIMIT 5
 SELECT
   gender, tripduration/60
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
 LIMIT 5
 
 
@@ -30,22 +36,42 @@ vs.
 SELECT
   gender, tripduration/60 AS duration_minutes
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
 LIMIT 5
 
+-- subqueries
+SELECT * FROM (
+  SELECT
+    gender, tripduration / 60 AS minutes
+  FROM
+    `bigquery-public-data`.new_york_citibike.citibike_trips
+)
+WHERE minutes < 10
+LIMIT 5
+
+WITH all_trips AS (
+  SELECT
+    gender, tripduration / 60 AS minutes
+  FROM
+    `bigquery-public-data`.new_york_citibike.citibike_trips
+)
+
+SELECT * from all_trips
+WHERE minutes < 10
+LIMIT 5
 
 -- Filtering with WHERE
 SELECT
   gender, tripduration
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
 WHERE tripduration < 600
 LIMIT 5
 
 SELECT
   gender, tripduration
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
 WHERE tripduration >= 300 AND tripduration < 600 AND gender = 'female'
 LIMIT 5
 
@@ -57,7 +83,7 @@ WHERE (tripduration < 600 AND gender = 'female') OR gender = 'male'
 SELECT
   gender, tripduration/60 AS minutes
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
 WHERE minutes < 10 -- CAN NOT REFERENCE ALIAS IN WHERE
 LIMIT 5
 
@@ -66,7 +92,7 @@ Has to be changed to:
 SELECT
   gender, tripduration/60 AS minutes
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
 WHERE (tripduration/60) < 10
 LIMIT 5
 
@@ -75,7 +101,7 @@ LIMIT 5
 SELECT
   gender, tripduration/60 AS minutes
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
 WHERE gender = 'female'
 ORDER BY minutes DESC
 LIMIT 5
@@ -85,14 +111,16 @@ LIMIT 5
 SELECT
   AVG(tripduration/60) AS avg_trip_duration
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
 WHERE
   gender = 'male'
 
 SELECT
   gender, AVG(tripduration/60) AS avg_trip_duration
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
+WHERE
+  tripduration is not NULL
 GROUP BY
   gender
 ORDER BY
@@ -101,29 +129,40 @@ ORDER BY
 
 -- Filtering grouped items with HAVING
 SELECT
-  gender, AVG(tripduration/60) AS avg_trip_duration
+  gender, AVG(tripduration / 60) AS avg_trip_duration
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
+WHERE tripduration IS NOT NULL
 GROUP BY
   gender
-HAVING gender != 'unknown' and avg_trip_duration IS NOT null
+HAVING avg_trip_duration > 14
 ORDER BY
   avg_trip_duration
-
 
 -- Finding unique values with DISTINCT
 SELECT DISTINCT 
    gender
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
 
+-- why empty?
+SELECT 
+	bikeid,
+	tripduration,
+	gender
+FROM
+  `bigquery-public-data`.new_york_citibike.citibike_trips
+WHERE gender = ""
+LIMIT 100
+
+
+-- distinct is on entire query
 SELECT DISTINCT 
   gender,
-  tripduration
+  usertype
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
-WHERE tripduration = 480 OR tripduration = 600
-
+  `bigquery-public-data`.new_york_citibike.citibike_trips
+WHERE gender != ''
 
 -- Arrays and Struct
 SELECT
@@ -131,7 +170,7 @@ SELECT
   , EXTRACT(YEAR from starttime) AS year
   , COUNT(1) AS numtrips
 FROM
-  `bigquery-public-data.new_york_citibike.citibike_trips`
+  `bigquery-public-data`.new_york_citibike.citibike_trips
 WHERE gender != 'unknown' and starttime IS NOT NULL
 GROUP BY gender, year
 HAVING year > 2016
@@ -146,7 +185,7 @@ FROM (
     , EXTRACT(YEAR from starttime) AS year
     , COUNT(1) AS numtrips
   FROM
-    `bigquery-public-data.new_york_citibike.citibike_trips`
+    `bigquery-public-data`.new_york_citibike.citibike_trips
   WHERE gender != 'unknown' and starttime IS NOT NULL
   GROUP BY gender, year
   HAVING year > 2016
@@ -163,7 +202,7 @@ FROM (
     , EXTRACT(YEAR from starttime) AS year
     , COUNT(1) AS numtrips
   FROM
-    `bigquery-public-data.new_york_citibike.citibike_trips`
+    `bigquery-public-data`.new_york_citibike.citibike_trips
   WHERE gender != 'unknown' and starttime IS NOT NULL
   GROUP BY gender, year
   HAVING year > 2016
@@ -227,7 +266,7 @@ WITH bicycle_rentals AS (
   SELECT
     COUNT(starttime) as num_trips,
     EXTRACT(DATE from starttime) as trip_date
-  FROM `bigquery-public-data.new_york_citibike.citibike_trips`
+  FROM `bigquery-public-data`.new_york_citibike.citibike_trips
   GROUP BY trip_date
 ),
 
@@ -263,7 +302,7 @@ WITH bicycle_rentals AS (
   SELECT
     COUNT(starttime) as num_trips,
     EXTRACT(DATE from starttime) as trip_date
-  FROM `bigquery-public-data.new_york_citibike.citibike_trips`
+  FROM `bigquery-public-data`.new_york_citibike.citibike_trips
   GROUP BY trip_date
 )
 SELECT * from bicycle_rentals LIMIT 5
