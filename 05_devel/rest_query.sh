@@ -1,6 +1,7 @@
 #!/bin/bash
 
-PROJECT="cloud-training-demos"
+PROJECT=$(gcloud config get-value project)
+
 read -d '' QUERY_TEXT << EOF
 SELECT 
   start_station_name
@@ -14,9 +15,7 @@ EOF
 
 read -d '' request << EOF
 {
- "kind": "bigquery#queryRequest",
- "useLegacySql": "false",
- "location": "EU",
+ "useLegacySql": false,
  "query": \"${QUERY_TEXT}\"
 }
 EOF
