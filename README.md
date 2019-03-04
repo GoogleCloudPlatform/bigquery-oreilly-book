@@ -2,9 +2,10 @@
 
 Source code accompanying:
 
-BigQuery: The Definitive Guide
+[BigQuery: The Definitive Guide](https://www.oreilly.com/library/view/google-bigquery-the/9781492044451/)
 by
 Lakshmanan & Tigani
-to be published by
-O'Reilly Media
+in early access now at O'Reilly media.
+
+
 
