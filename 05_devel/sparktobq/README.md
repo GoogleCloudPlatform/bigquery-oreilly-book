@@ -9,9 +9,18 @@
 
 
 ## Part 1
-* Create a [new Dataproc cluster](https://console.cloud.google.com/dataproc) from the GCP console, making sure to enable Advanced Features and turning on the ```Anaconda``` and ```Jupyter``` web interfaces.
-* When cluster is started, click on the Jupyter Link (in web interfaces menu of new cluster)
+* Create a [new Dataproc cluster](https://console.cloud.google.com/dataproc) from the GCP console:
+  * Enable access to web interfaces.
+  * Expand Advanced Features
+  * Specify a staging bucket. Your notebooks will be stored here.
+  * Change the Dataproc Image to 1.4 or higher.
+  * Turn on the optional opensource components ```Anaconda``` and ```Jupyter``` .
+* When cluster is started, click on the JupyterLab Link (in web interfaces menu of new cluster)
 * Start a new Jupyter notebook and copy-paste cells from [01_spark.ipynb](01_spark.ipynb) and run them.
+  * Alternately, ```git clone``` this repo
+  * Modify ```copy_to_gcs.sh``` to have your bucket
+  * Run ```copy_to_gcs.sh```
+  * The notebooks should show up in your menu
 
 ### Part 2
 * From the part 1 notebook (above), replace ```hadoop fs``` by ```gsutil```
