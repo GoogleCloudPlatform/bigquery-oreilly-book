@@ -19,6 +19,7 @@ gcloud dataproc workflow-templates set-managed-cluster $TEMPLATE \
     --worker-machine-type $MACHINE_TYPE \
     --initialization-actions $STARTUP_SCRIPT \
     --num-workers 2 \
+    --image-version 1.14 \
     --cluster-name $CLUSTER
 
 # steps in job

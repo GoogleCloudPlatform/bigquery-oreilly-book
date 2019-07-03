@@ -5,7 +5,7 @@
 * [Part 2](02_gcs.ipynb): Replace HDFS by Google Cloud Storage. This enables job-specific-clusters. (cloud-native)
 * [Part 3](03_automate.ipynb): Automate everything, so that we can run in a job-specific cluster. (cloud-optimized)
 * [Part 4](04_bigquery.ipynb): Load CSV into BigQuery, use BigQuery. (modernize)
-* [Part 4](05_functions.ipynb): Using Cloud Functions, launch analysis every time there is a new file in the bucket. (serverless)
+* [Part 5](05_functions.ipynb): Using Cloud Functions, launch analysis every time there is a new file in the bucket. (serverless)
 
 
 ## Part 1
@@ -16,11 +16,13 @@
   * Change the Dataproc Image to 1.4 or higher.
   * Turn on the optional opensource components ```Anaconda``` and ```Jupyter``` .
 * When cluster is started, click on the JupyterLab Link (in web interfaces menu of new cluster)
-* Start a new Jupyter notebook and copy-paste cells from [01_spark.ipynb](01_spark.ipynb) and run them.
-  * Alternately, ```git clone``` this repo
-  * Modify ```copy_to_gcs.sh``` to have your bucket
-  * Run ```copy_to_gcs.sh```
-  * The notebooks should show up in your menu
+  * In a Terminal, ```git clone https://github.com/GoogleCloudPlatform/bigquery-oreilly-book```
+  * Type: ```cd bigquery-oreilly-book/05_devel/sparktobq```
+  * In an editor, modify ```copy_to_gcs.sh``` to refer to your bucket
+  * Type: ```./copy_to_gcs.sh```
+  * The notebooks should show up in the menu of JupyterLab
+* Open [01_spark.ipynb](01_spark.ipynb), read the cells, and run them.
+
 
 ### Part 2
 * From the part 1 notebook (above), replace ```hadoop fs``` by ```gsutil```
@@ -33,6 +35,7 @@
 * Test running it standalone
 * You may have to replace uses of ```gsutil``` within Spark code by Python API
 * From CloudShell:
+  * 
   * Use the script [submit_onejob.sh](submit_onejob.sh) to submit the created file ```spark_analysis.py``` to the cluster you have created above.
   * Wait for job to finish.
   * Delete the ```sparktobq``` cluster -- you don't need it any more.
