@@ -1,0 +1,366 @@
+SELECT 
+  state_name
+FROM `bigquery-public-data`.utility_us.us_states_area
+WHERE
+   ST_Contains(
+     state_geom,
+     ST_GeogPoint(-122.33, 47.61))
+(-122.33, 47.61)state_namestate_geomFROMbigquery-public-data us_states_areautility_us.utility_us us_states_areazlesszless college_scorecard.csv.gz
+bq --location=US mk ch04
+bqbqmkch04us-east4europe-west2australia-southeast1bq --location=US \
+   load \
+   --source_format=CSV --autodetect \
+   ch04.college_scorecard \
+   ./college_scorecard.csv.gz 
+Could not parse 'NULL' as int for field HBCU (position 26) starting at location 11945910
+CSV table encountered too many errors, giving up. Rows: 591; errors: 1.
+HBCUNULLNULL --max_bad_records=20NULLbq --location=US \
+   load --null_marker=NULL \
+   --source_format=CSV --autodetect \
+   ch04.college_scorecard \
+   ./college_scorecard.csv.gz 
+bq loadbq load --helpbq --location=US \
+   load --null_marker=NULL --replace \
+   --source_format=CSV --autodetect \
+   ch04.college_scorecard \
+   ./college_scorecard.csv.gz 
+--replace=falsech04SELECT
+  INSTNM
+  , ADM_RATE_ALL
+  , FIRST_GEN
+  , MD_FAMINC
+  , MD_EARN_WNE_P10
+  , SAT_AVG
+FROM
+  ch04.college_scorecard
+WHERE
+  SAFE_CAST(SAT_AVG AS FLOAT64) > 1300
+  AND SAFE_CAST(ADM_RATE_ALL AS FLOAT64) < 0.2
+  AND SAFE_CAST(FIRST_GEN AS FLOAT64) > 0.1
+ORDER BY
+  CAST(MD_FAMINC AS FLOAT64) ASC
+SAFE_CAST(ADM_RATE_ALL AS FLOAT64)No matching signature for operator > for argument types: STRING, INT64.PrivacySuppressedBad double value: PrivacySuppressed; while executing the filter ...
+PrivacySuppressedzless ./college_scorecard.csv.gz | \
+        sed 's/PrivacySuppressed/NULL/g' | \
+        gzip > /tmp/college_scorecard.csv.gz
+sedSAT_AVGADM_RATEbq show --format prettyjson --schema ch04.college_scorecard
+bq show --format prettyjson --schema ch04.college_scorecard > schema.json
+SELECT 
+  table_name
+  , column_name
+  , ordinal_position
+  , is_nullable
+  , data_type
+FROM
+  ch04.INFORMATION_SCHEMA.COLUMNS
+TO_JSON_STRINGSELECT 
+  TO_JSON_STRING(
+    ARRAY_AGG(STRUCT( 
+      IF(is_nullable = 'YES', 'NULLABLE', 'REQUIRED') AS mode,
+      column_name AS name,
+      data_type AS type)
+    ORDER BY ordinal_position), TRUE) AS schema
+FROM
+  ch04.INFORMATION_SCHEMA.COLUMNS
+WHERE
+  table_name = 'college_scorecard'
+[
+  {
+    "mode": "NULLABLE",
+    "name": "INSTNM",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "ADM_RATE_ALL",
+    "type": "FLOAT64"
+  },
+...
+SAT_AVG, ADM_RATE_ALL, FIRST_GEN  MD_FAMINC)  FLOAT64:
+  {
+    "mode": "NULLABLE",
+    "name": "FIRST_GEN",
+    "type": "FLOAT64"
+  },
+
+T4APPROVALDATESTRING  {
+    "mode": "NULLABLE",
+    "name": "T4APPROVALDATE",
+    "type": "STRING"
+  },
+
+bq --location=US \
+   load --null_marker=NULL --replace \
+   --source_format=CSV \
+   --schema=schema.json --skip_leading_rows=1 \
+   ch04.college_scorecard \
+   ./college_scorecard.csv.gz 
+
+SELECT
+  INSTNM
+  , ADM_RATE_ALL
+  , FIRST_GEN
+  , MD_FAMINC
+  , MD_EARN_WNE_P10
+  , SAT_AVG
+FROM
+  ch04.college_scorecard
+WHERE
+  SAT_AVG > 1300
+  AND ADM_RATE_ALL < 0.2
+  AND FIRST_GEN > 0.1
+ORDER BY
+  MD_FAMINC ASC
+CREATE TABLECREATE OR REPLACE TABLE ch04.college_scorecard_etl AS
+ SELECT 
+    INSTNM
+    , ADM_RATE_ALL
+    , FIRST_GEN
+    , MD_FAMINC
+    , SAT_AVG
+    , MD_EARN_WNE_P10
+ FROM ch04.college_scorecard
+bq rm ch04.college_scorecard
+bq rm -r -f ch04
+DROP TABLE IF EXISTS ch04.college_scorecard_gcs
+ALTER TABLE SET OPTIONSALTER TABLE ch04.college_scorecard
+ SET OPTIONS (
+   expiration_timestamp=TIMESTAMP_ADD(CURRENT_TIMESTAMP(), 
+                                       INTERVAL 7 DAY),
+   description="College Scorecard expires seven days from now"
+ )
+DROP TABLEALTER TABLECREATE TABLEDELETE FROM ch04.college_scorecard
+WHERE SAT_AVG IS NULL
+INSERT ch04.college_scorecard 
+  (INSTNM
+    , ADM_RATE_ALL
+    , FIRST_GEN
+    , MD_FAMINC
+    , SAT_AVG
+    , MD_EARN_WNE_P10
+  )
+  VALUES ('abc', 0.1, 0.3, 12345, 1234, 23456),
+         ('def', 0.2, 0.2, 23451, 1232, 32456)
+INSERT ch04.college_scorecard
+SELECT * 
+FROM ch04.college_scorecard_etl
+WHERE SAT_AVG IS NULL
+SQL COPYbq cpbq cp ch04.college_scorecard someds.college_scorecard_copy
+bq cp-a--append_table-noappend_tableCREATE TABLE AS SELECTINSERT VALUESbq cpgsutil cpbq loadgsutil -m cp *.csv gs://BUCKET/some/location
+bqload … gs://BUCKET/some/location/*.csv 
+bq loadbq loadbq loadbq mkdef
+bq mkbq mkdefbq load--autodetect:
+bq mkdef --source_format=CSV \
+   --autodetect \
+   gs://bigquery-oreilly-book/college_scorecard.csv
+bq mkbq mkdef --source_format=CSV \
+   --autodetect \
+   gs://bigquery-oreilly-book/college_scorecard.csv \
+   > /tmp/mytable.json
+bq mk --external_table_definition=/tmp/mytable.json \
+   ch04.college_scorecard
+
+course_grades.csv-00095-of-00313bq mkdef --source_format=CSV \
+   --autodetect \
+   gs://bigquery-oreilly-book/college_* \
+   > /tmp/mytable.json
+LOC="--location US"
+INPUT=gs://bigquery-oreilly-book/college_scorecard.csv
+
+SCHEMA=$(gsutil cat $INPUT | head -1 | awk -F, '{ORS=","}{for (i=1; i <= NF; i++){ print $i":STRING"; }}' | sed 's/,$//g'| cut -b 4- )
+
+bq $LOC query \
+   --external_table_definition=cstable::${SCHEMA}@CSV=${INPUT} \
+   'SELECT SUM(IF(SAT_AVG != "NULL", 1, 0))/COUNT(SAT_AVG) FROM cstable'
+--external_table_definition=cstable::${DEF}bq mkdef --source_format=PARQUET gs://bucket/dir/files* > table_def.json
+bq mk --external_table_definition=table_def.json <dataset>.<table>
+bq load --source_format=ORC --autodetect \
+   --hive_partitioning_mode=AUTO <dataset>.<table> <gcs_uri> 
+datestampgs://some-bucket/some-dir/some-table/*
+gs://some-bucket/some-dir/some-table/datestamp=
+STRINGINTEGERDATETIMESTAMPbq load --source_format=ORC --autodetect \
+  --hive_partitioning_mode=STRINGS <dataset>.<table> <gcs_uri>bq mkdef --source_format=ORC --autodetect \
+       --hive_partitioning_mode=AUTO <gcs_uri>  > table_def.jsonbq mkdef --source_format=NEWLINE_DELIMITED_JSON --autodetect --hive_partitioning_mode=STRINGS <gcs_uri> <schema>  > table_def.json
+bq mkdefFIELD1:DATATYPE1,FIELD2:DATATYPE2,...
+FIELD1,FIELD2,FIELD3,,...INPUT=gs://bigquery-oreilly-book/college_scorecard.csv
+SCHEMA=$(gsutil cat $INPUT | head -1 | cut -b 4- )
+sedLOC="--location US"
+OUTPUT=/tmp/college_scorecard_def.json
+bq $LOC \
+   mkdef \
+   --source_format=CSV \
+   --noautodetect \
+   $INPUT \
+   $SCHEMA \
+  | sed 's/"skipLeadingRows": 0/"skipLeadingRows": 1/g' \
+  | sed 's/"allowJaggedRows": false/"allowJaggedRows": true/g' \
+  > $OUTPUT
+SELECT
+  MAX(CAST(SAT_AVG AS FLOAT64)) AS MAX_SAT_AVG
+FROM
+  `ch04.college_scorecard_gcs`
+Bad double value: NULL
+NULLWITH etl_data AS (
+  SELECT
+   SAFE_CAST(SAT_AVG AS FLOAT64) AS SAT_AVG
+  FROM
+   `ch04.college_scorecard_gcs`
+)
+SELECT
+  MAX(SAT_AVG) AS MAX_SAT_AVG
+FROM
+  etl_data
+CREATE TEMP FUNCTION cleanup_numeric(x STRING) AS
+(
+  IF ( x != 'NULL' AND x != 'PrivacySuppressed',
+       CAST(x as FLOAT64),
+       NULL )
+);
+
+WITH etl_data AS (
+   SELECT
+     INSTNM
+     , cleanup_numeric(ADM_RATE_ALL) AS ADM_RATE_ALL
+     , cleanup_numeric(FIRST_GEN) AS FIRST_GEN
+     , cleanup_numeric(MD_FAMINC) AS MD_FAMINC
+     , cleanup_numeric(SAT_AVG) AS SAT_AVG
+     , cleanup_numeric(MD_EARN_WNE_P10) AS MD_EARN_WNE_P10
+   FROM
+     `ch04.college_scorecard_gcs`
+)
+
+SELECT
+  *
+FROM
+  etl_data
+WHERE
+  SAT_AVG  > 1300
+  AND ADM_RATE_ALL < 0.2
+  AND FIRST_GEN > 0.1
+ORDER BY
+  MD_FAMINC ASC
+LIMIT 10
+SELECT *CREATE TABLECREATE TEMP FUNCTION cleanup_numeric(x STRING) AS
+(
+  IF ( x != 'NULL' AND x != 'PrivacySuppressed',
+       CAST(x as FLOAT64),
+       NULL )
+);
+
+CREATE TABLE ch04.college_scorecard_etl
+OPTIONS(description="Cleaned up college scorecard data") AS
+
+WITH etl_data AS (
+   SELECT
+     INSTNM
+     , cleanup_numeric(ADM_RATE_ALL) AS ADM_RATE_ALL
+     , cleanup_numeric(FIRST_GEN) AS FIRST_GEN
+     , cleanup_numeric(MD_FAMINC) AS MD_FAMINC
+     , cleanup_numeric(SAT_AVG) AS SAT_AVG
+     , cleanup_numeric(MD_EARN_WNE_P10) AS MD_EARN_WNE_P10
+   FROM
+     `ch04.college_scorecard_gcs`
+)
+
+SELECT * FROM etl_data
+ 
+CREATE TABLEbq query--destination_tableJSON_EXTRACTprotopayload_auditlog.metadataJsontableDataReadSELECT
+    REGEXP_EXTRACT(protopayload_auditlog.resourceName, '^projects/[^/]+/datasets/([^/]+)/tables') AS datasetRef,
+    COUNTIF(JSON_EXTRACT(protopayload_auditlog.metadataJson, "$.tableDataRead") IS NOT NULL) AS dataReadEvents,
+  FROM ch04.cloudaudit_googleapis_com_data_access_2019*
+  WHERE
+    JSON_EXTRACT(protopayload_auditlog.metadataJson, "$.tableDataRead") IS NOT NULL
+  GROUP BY datasetRef
+  ORDER BY dataReadEvents DESC
+  LIMIT 5
+JSON_EXTRACTprotopayload_auditlog.metadataJsonsomedbmysql somedb < select_data.sql | \
+      gsutil cp - gs://BUCKET/data_$(date -u "+%F-%T").tsvselect_data.sqlselect * from my_table 
+where  transaction_date >= DATE_SUB(CURDATE(), INTERVAL 10 DAY)
+https://sheets.newSELECT * from advdata.students
+SELECT
+  *
+FROM
+  ch04.college_scorecard_etl=ArrayFormula(IF(ISBLANK(D2:D), 0, F2:F/D2:D))
+stateRowsyearColumnsValuesnumberCOUNT_UNIQUEDefaultcollege_scorecard_gsSELECT INSTNM, COUNT(display_name) AS numusers
+FROM `bigquery-public-data`.stackoverflow.users, ch04.college_scorecard_gs
+WHERE REGEXP_CONTAINS(about_me, INSTNM)
+GROUP BY INSTNM
+ORDER BY numusers DESC
+LIMIT 5
+GOOG#buy#20190119-090356.0322234setup_data.shhttps://googleapis.com/bigtable/projects/[PROJECT_ID]/instances/[INSTANCE_ID]/tables/[TABLE_NAME]. PROJECT_IDINSTANCE_IDTABLE_NAMElogs-tablesalesSELECT SUM(sales.qty.cell.value) AS num_sold
+FROM ch04.logs
+WHERE sales.itemid.cell.value = '12345'
+asia-northeast1,EUbigquery.adminCREATE OR REPLACE TABLE
+ch04.college_scorecard_dts
+AS
+SELECT * FROM ch04.college_scorecard_gcs 
+LIMIT 0
+college_scorecard_dts CREATE TABLE
+ch04.college_scorecard_valid_sat
+AS
+SELECT * FROM ch04.college_scorecard_gcs 
+WHERE LENGTH(SAT_AVG) > 0
+ch04.college_scorecard_valid_satch04.college_scorecard_gcs CREATE TABLECREATE OR REPLACECREATE IF NOT EXISTSCREATE TABLE ch04.payment_transactions
+(
+  PAYEE STRING OPTIONS(description="Id of payee"),
+  AMOUNT NUMERIC OPTIONS(description="Amount paid")
+)
+bq mk --transfer_config --data_source=google_cloud_storage \
+--target_dataset=ch04 --display_name ch04_college_scorecard \   
+--params='{"data_path_template":"gs://bigquery-oreilly-book/college_*.csv", "destination_table_name_template":"college_scorecard_dts", "file_format":"CSV", "max_bad_records":"10", "skip_leading_rows":"1", "allow_jagged_rows":"true"}'
+youtube_channelch04mytable_{run_time|"%Y%m%d"}
+datetimemytable_{run_date}{run_time+45m|"%Y%m%d"}_mytable_{run_time|"%H%M%s"}
+20180915_mytable_004500run_daterun_timeSELECT
+  gender, AVG(tripduration / 60) AS avg_trip_duration
+FROM
+  `bigquery-public-data`.new_york_citibike.citibike_trips
+GROUP BY
+  gender
+HAVING avg_trip_duration > 14
+ORDER BY
+  avg_trip_duration
+SELECT protopayload_auditlog.status.message FROM ch04.cloudaudit_googleapis_com_data_access_20190128
+  
+  INPATTERNS = 'gs://bigquery-oreilly-book/college_*.csv'
+  RUNNER = 'DataflowRunner'
+  with beam.Pipeline(RUNNER, options = opts) as p:
+    (p 
+      | 'read' >> beam.io.ReadFromText(INPATTERNS, skip_header_lines=1)
+      | 'parse_csv' >> beam.FlatMap(parse_csv)
+      | 'pull_fields' >> beam.FlatMap(pull_fields)
+      | 'write_bq' >> beam.io.gcp.bigquery.WriteToBigQuery(bqtable, bqdataset, schema=get_output_schema())
+    )
+parse_csvdef parse_csv(line):
+  try:
+    values = line.split(',')
+    rowdict = {}
+    for colname, value in zip(COLNAMES, values):
+      rowdict[colname] = value
+    yield rowdict
+  except:
+    logging.warn('Ignoring line ...')parse_csvpull_fieldsINSTNMdef pull_fields(rowdict):
+  result = {}
+  # required string fields 
+  for col in 'INSTNM'.split(','):
+    if col in rowdict:
+      result[col] = rowdict[col]
+    else:
+      logging.info('Ignoring line missing {}', col)
+      return
+      
+  # float fields
+  for col in 'ADM_RATE_ALL,FIRST_GEN,MD_FAMINC,SAT_AVG,MD_EARN_WNE_P10'.split(','):
+    try:
+      result[col] = (float) (rowdict[col])
+    except:
+      result[col] = None
+  yield result
+beam.io.gcp.bigquery.WriteToBigQueryINSTNM:string,ADM_RATE_ALL:FLOAT64,FIRST_GEN:FLOAT64,...
+# create an array of tuples and insert as data becomes available
+rows_to_insert = [
+    (u'U. Puerto Rico', 0.18,0.46,23000,1134,32000),
+    (u'Guam U.', 0.43,0.21,28000,1234,33000)
+]
+errors = client.insert_rows(table, rows_to_insert)  # API request
+bq load gsutilgsutil -m cp /some/dir/myfiles*.csv gs://bucket/some/dir
+bq loadgsutil bq load

@@ -1,0 +1,90 @@
+SELECT 17curlPOST /bigquery/v2/projects/bigquery-e2e/jobs HTTP/1.1
+User-Agent: curl/7.30.0
+Host: www.googleapis.com
+Accept: */*
+Authorization: Bearer <redacted>
+Content-Type: application/json
+Content-Length: 126
+{'configuration': {'query': {'query': 'SELECT 17'}}}
+POSTSELECT 17bq.pySELECTSELECT 
+  COUNT(*)
+   , start_station_name 
+FROM 
+   `bigquery-public-data`.london_bicycles.cycle_hire
+GROUP BY 2
+ORDER BY 1 DESC
+LIMIT 10
+
+SELECT 
+   COUNT(*)
+    , starts.start_station_id as point_a
+    , ends.start_station_id as point_b
+FROM 
+ `bigquery-public-data`.london_bicycles.cycle_hire starts,
+  `bigquery-public-data`.london_bicycles.cycle_hire ends
+WHERE 
+  starts.start_station_id = ends.end_station_id
+  AND ends.start_station_id = starts.end_station_id
+  AND starts.start_station_id <> ends.start_station_id
+  AND starts.start_date = ends.start_date
+GROUP BY 2, 3
+ORDER BY 1 DESC
+LIMIT 10
+
+SELECT COUNT(*) as c
+FROM `bigquery-public-data.new_york_taxi_trips.tlc_yellow_trips_2017` 
+WHERE passenger_count > 5
+bqbq --format=prettyjson show -j <my_job_id> \
+      | grep completedParallelInputs
+
+
+          "completedParallelInputs": "9",
+          "completedParallelInputs": "1",
+COUNT_STAR() SELECT title, COUNT(title) as c 
+FROM  `bigquery-samples.wikipedia_benchmark.Wiki1B`
+WHERE title LIKE "G%o%o%g%l%e"
+GROUP BY title
+ORDER BY c DESC
+SELECT title, COUNT(title) as c 
+FROM  `bigquery-samples.wikipedia_benchmark.Wiki1B`
+GROUP BY title
+ORDER BY c DESC
+WITH 
+repo_commits AS (
+  SELECT repos AS repo_name, author.name AS author
+  FROM `bigquery-public-data.github_repos.commits` c, c.repo_name repos
+  WHERE author.name IN ("Valliappa Lakshmanan", "Jordan Tigani")
+  GROUP BY repos, author),
+repo_languages AS (
+  SELECT lang.name AS lang, lang.bytes AS lang_bytes, repos.repo_name AS repo_name
+  FROM `bigquery-public-data.github_repos.languages` repos, repos.LANGUAGE AS lang )
+  
+SELECT lang, author, SUM(lang_bytes) AS total_bytes
+FROM repo_languages
+JOIN repo_commits USING (repo_name)
+GROUP BY lang, author
+ORDER BY total_bytes DESC
+SELECT lang, author, SUM(lang_bytes) AS total_bytes
+FROM repo_languages
+JOIN repo_commits USING (repo_name)
+GROUP BY lang, author
+ORDER BY total_bytes DESC
+INNER JOIN EACH WITH ALLALLWITH 
+repo_commits AS (
+  SELECT repos AS repo_name, author.name AS author
+  FROM `bigquery-public-data.github_repos.commits` c, c.repo_name repos
+ -- WHERE author.name IN ("Valliappa Lakshmanan", "Jordan Tigani")
+  GROUP BY repos, author),
+repo_languages AS (
+  SELECT lang.name AS lang, lang.bytes AS lang_bytes, repos.repo_name AS repo_name
+  FROM `bigquery-public-data.github_repos.languages` repos, repos.LANGUAGE AS lang )
+  
+SELECT lang, author, SUM(lang_bytes) AS total_bytes
+FROM repo_languages
+JOIN repo_commits USING (repo_name)
+GROUP BY lang, author
+ORDER BY total_bytes DESC
+LIMIT 100
+INNER JOIN EACH WITH EACHEACH WITH ALLHASHPENDINGCOMMITTEDGARBAGEPENDINGCOMMITTEDGARBAGEGARBAGECOMMITTEDtables.delete()WHERE eventDate >= '20170102'2017010220170103customer_id customer_idcustomer_idSELECT … WHERE customer_id = 275customer_idcustomer_idcustomer_idSELECT orders.order_idFROM retail.orders AS orders JOIN retail.customers ON orders.customer_id = customers.customer_id
+WHERE customers.customer_name = 'Jordan Tigani'
+customer_idcustomer_idcustomer_idorder_idINSERTUPDATEDELETEMERGEINSERTINSERTDELETEDELETE … WHERE customer_id = 1234GARBAGEUPDATEINSERTDELETEMERGEUPDATEUPDATEMERGEDELETEUPDATEMERGEWHERE field1 = 30

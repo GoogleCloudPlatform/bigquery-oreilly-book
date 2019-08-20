@@ -1,0 +1,298 @@
+WITH example AS (
+  SELECT 'Sat' AS day, 1451 AS numrides, 1018 AS oneways
+  UNION ALL SELECT 'Sun', 2376, 936
+)
+SELECT *, (oneways/numrides) AS frac_oneway  from example
+ 
+CREATE TEMP FUNCTION lastElement(arr ANY TYPE) AS (
+  arr[ORDINAL(ARRAY_LENGTH(arr))]
+);
+WITH example AS (
+  SELECT 'Sat' AS day, 1451 AS numrides, 1018 AS oneways
+  UNION ALL SELECT 'Sun', 2376, 936
+)
+SELECT *, ROUND(oneways/numrides, 2) AS frac_oneway from exampleWITH example AS (
+  SELECT 'Sat' AS day, 1451 AS numrides, 1018 AS oneways
+  UNION ALL SELECT 'Sun', 2376, 936
+  UNION ALL SELECT 'Wed', 0, 0
+)
+SELECT 
+   *, ROUND(IEEE_Divide(oneways, numrides), 2)
+AS frac_oneway from example
+NaNSAFESELECT LOG(10, -3), LOG(10, 3)
+SELECT SAFE.LOG(10, -3), SAFE.LOG(10, 3)
+NULLLOG(10, -3)SAFESUBSTRNULLSAFE.SUBSTRNULLNaN-infWITH example AS (
+  SELECT 'Sat' AS day, 1451 AS numrides, 1018 AS oneways
+  UNION ALL SELECT 'Sun', 2376, 936
+  UNION ALL SELECT 'Mon', NULL, NULL
+  UNION ALL SELECT 'Tue', IEEE_Divide(-3,0), 0  -- this is -inf,0
+)
+SELECT * from example
+ORDER BY numrides
+SELECT * from example
+WHERE numrides < 2000
+!genderWITH example AS (
+  SELECT 1.23 AS payment
+  UNION ALL SELECT 7.89
+  UNION ALL SELECT 12.43
+)
+SELECT 
+  SUM(payment) AS total_paid,
+  AVG(payment) AS average_paid
+FROM example
+WITH example AS (
+  SELECT NUMERIC '1.23' AS payment
+  UNION ALL SELECT NUMERIC '7.89'
+  UNION ALL SELECT NUMERIC '12.43'
+)
+SELECT 
+  SUM(payment) AS total_paid,
+  AVG(payment) AS average_paid
+FROM example
+NUMERIC '1.23')SELECT  gender, tripdurationFROM  `bigquery-public-data`.new_york_citibike.citibike_tripsWHERE (tripduration < 600 AND gender = 'female') OR gender = 'male'WITH example AS (
+  SELECT NULL AS is_vowel, NULL as letter, -1 as position
+  UNION ALL SELECT true, 'a', 1
+  UNION ALL SELECT false, 'b', 2
+  UNION ALL SELECT false, 'c', 3
+)
+SELECT * from example WHERE is_vowel != false
+WITH example AS (
+  SELECT NULL AS is_vowel, NULL as letter, -1 as position
+  UNION ALL SELECT true, 'a', 1
+  UNION ALL SELECT false, 'b', 2
+  UNION ALL SELECT false, 'c', 3
+)
+SELECT * from example WHERE is_vowel IS NOT false
+WITH example AS (
+  SELECT NULL AS is_vowel, NULL as letter, -1 as position
+  UNION ALL SELECT true, 'a', 1
+  UNION ALL SELECT false, 'b', 2
+  UNION ALL SELECT false, 'c', 3
+)
+SELECT * from example WHERE is_vowel
+WITH catalog AS (
+   SELECT 30.0 AS costPrice, 0.15 AS markup, 0.1 AS taxRate
+   UNION ALL SELECT NULL, 0.21, 0.15
+   UNION ALL SELECT 30.0, NULL, 0.09
+   UNION ALL SELECT 30.0, 0.30, NULL
+   UNION ALL SELECT 30.0, NULL, NULL
+)
+SELECT
+  *, ROUND(
+    costPrice * 
+    IF(markup IS NULL, 1.05, 1+markup) * 
+    IF(taxRate IS NULL, 1.10, 1+taxRate) 
+  , 2) AS salesPrice
+FROM catalog
+WITH catalog AS (
+   SELECT 30.0 AS costPrice, 0.15 AS markup, 0.1 AS taxRate
+   UNION ALL SELECT NULL, 0.21, 0.15
+   UNION ALL SELECT 30.0, NULL, 0.09
+   UNION ALL SELECT 30.0, 0.30, NULL
+   UNION ALL SELECT 30.0, NULL, NULL
+)
+SELECT
+  *, ROUND(COALESCE(
+  costPrice * (1+markup) * (1+taxrate),
+  costPrice * 1.05 * (1+taxrate),
+  costPrice * (1+markup) * 1.10,
+  NULL
+  ),2) AS salesPrice
+FROM catalog
+IFNULLCOALESCEIFNULL(a, b)COALESCE(a, b)ba  NULL IFNULL(a, b) IF(a IS NULL, b, a)SELECT
+  *, ROUND(
+    costPrice * 
+    (1 + IFNULL(markup, 0.05)) * 
+    (1 + IFNULL(taxrate,0.10)) 
+  , 2) AS salesPrice
+FROM catalog
+
+WITH example AS (
+  SELECT 'John' as employee, 'Paternity Leave' AS hours_worked
+  UNION ALL SELECT 'Janaki', '35'
+  UNION ALL SELECT 'Jian', 'Vacation'
+  UNION ALL SELECT 'Jose', '40'
+)
+
+WITH example AS (
+  SELECT 'John' as employee, 'Paternity Leave' AS hours_worked
+  UNION ALL SELECT 'Janaki', '35'
+  UNION ALL SELECT 'Jian', 'Vacation'
+  UNION ALL SELECT 'Jose', '40'
+)
+SELECT SUM(hours_worked) from example
+SELECT CAST("true" AS bool), CAST("invalid" AS bool)
+SELECT CAST("true" AS bool), SAFE_CAST("invalid" AS bool)
+hours_workedWITH example AS (
+  SELECT 'John' as employee, 'Paternity Leave' AS hours_worked
+  UNION ALL SELECT 'Janaki', '35'
+  UNION ALL SELECT 'Jian', 'Vacation'
+  UNION ALL SELECT 'Jose', '40'
+)
+SELECT SUM(SAFE_CAST(hours_worked AS INT64)) from example
+WITH example AS (
+  SELECT 'John' as employee, '0' AS hours_worked
+  UNION ALL SELECT 'Janaki', '35'
+  UNION ALL SELECT 'Jian', '0'
+  UNION ALL SELECT 'Jose', '40'
+)
+SELECT SUM(CAST(hours_worked AS INT64)) from example
+WITH example AS (
+  SELECT true AS is_vowel, 'a' as letter, 1 as position
+  UNION ALL SELECT false, 'b', 2
+  UNION ALL SELECT false, 'c', 3
+)
+SELECT * from example
+SELECT SUM(is_vowel) as num_vowels from example
+
+WITH example AS (
+  SELECT true AS is_vowel, 'a' as letter, 1 as position
+  UNION ALL SELECT false, 'b', 2
+  UNION ALL SELECT false, 'c', 3
+)
+SELECT SUM(CAST (is_vowel AS INT64)) as num_vowels from example 
+WITH example AS (
+  SELECT true AS is_vowel, 'a' as letter, 1 as position
+  UNION ALL SELECT false, 'b', 2
+  UNION ALL SELECT false, 'c', 3
+)
+SELECT SUM(IF(is_vowel, 1, 0)) as num_vowels from example
+WITH example AS (
+  SELECT true AS is_vowel, 'a' as letter, 1 as position
+  UNION ALL SELECT false, 'b', 2
+  UNION ALL SELECT false, 'c', 3
+)
+SELECT COUNTIF(is_vowel) as num_vowels from example
+WITH example AS (
+  SELECT * from unnest([
+    'Seattle', 'New York', 'Singapore'
+  ]) AS city
+)
+SELECT 
+  city
+  , LENGTH(city) AS len
+  , LOWER(city) AS lower
+  , STRPOS(city, 'or') AS orpos
+FROM example
+WITH example AS (
+  SELECT 'armin@abc.com' AS email, 'Anapolis, MD' as city
+  UNION ALL SELECT 'boyan@bca.com', 'Boulder, CA'
+  UNION ALL SELECT 'carrie@cab.com', 'Chicago, IL'
+)
+
+SELECT 
+  CONCAT(
+     SUBSTR(email, 1, STRPOS(email, '@') - 1), -- username
+     ' from ', city) AS callers
+FROM example
+WITH example AS (
+  SELECT * from unnest([
+    'Seattle', 'New York', 'சிங்கப்பூர்', '東京'
+  ]) AS city
+)
+SELECT 
+  city
+  , UPPER(city) AS allcaps
+  , CAST(city AS BYTES) as bytes
+FROM example
+WITH example AS (
+  SELECT * from unnest([
+    'Seattle', 'New York', 'சிங்கப்பூர்', '東京'
+  ]) AS city
+)
+SELECT 
+  city
+  , CHAR_LENGTH(city) as char_len
+  , TO_CODE_POINTS(city)[OFFSET(1)] as first_code_point
+  , ARRAY_LENGTH(TO_CODE_POINTS(city)) as num_code_points
+  , CAST (city AS BYTES) as bytes
+  , BYTE_LENGTH(city) as byte_len
+FROM example
+SELECT
+  CAST(42 AS STRING)
+  , CAST('42' AS INT64)
+  , FORMAT('%03d', 42)
+  , FORMAT('%5.3f', 32.457842)
+  , FORMAT('%5.3f', 32.4)
+  , FORMAT('**%s**', 'H')
+  , FORMAT('%s-%03d', 'Agent', 7)
+SELECT
+  ENDS_WITH('Hello', 'o') -- true
+  , ENDS_WITH('Hello', 'h') -- false
+  , STARTS_WITH('Hello', 'h') -- false
+  , STRPOS('Hello', 'e') -- 2
+  , STRPOS('Hello', 'f') -- 0 for not-found
+  , SUBSTR('Hello', 2, 4) -- 1-based
+  , CONCAT('Hello', 'World')
+SELECT
+  LPAD('Hello', 10, '*') -- left pad with *
+  , RPAD('Hello', 10, '*') -- right pad
+  , LPAD('Hello', 10) -- left pad with spaces
+  , LTRIM('   Hello   ') -- trim whitespace on left
+  , RTRIM('   Hello   ') -- trim whitespace on right
+  , TRIM ('   Hello   ') -- trim whitespace both ends
+  , TRIM ('***Hello***', '*') -- trim * both ends
+  , REVERSE('Hello') -- reverse the string
+SELECT
+  column
+  , REGEXP_CONTAINS(column, r'\d{5}(?:[-\s]\d{4})?') has_zipcode
+  , REGEXP_CONTAINS(column, r'^\d{5}(?:[-\s]\d{4})?$') is_zipcode
+  , REGEXP_EXTRACT(column, r'\d{5}(?:[-\s]\d{4})?') the_zipcode 
+  , REGEXP_EXTRACT_ALL(column, r'\d{5}(?:[-\s]\d{4})?') all_zipcodes 
+  , REGEXP_REPLACE(column, r'\d{5}(?:[-\s]\d{4})?', '*****') masked
+FROM (
+  SELECT * from unnest([
+     '12345', '1234', '12345-9876', 
+     'abc 12345 def', 'abcde-fghi',
+     '12345 ab 34567', '12345 9876'
+  ]) AS column
+)
+rSELECT t1, t2, TIMESTAMP_DIFF(t1, t2, MICROSECOND)
+FROM (SELECT
+  TIMESTAMP "2017-09-27 12:30:00.45" AS t1,
+  TIMESTAMP "2017-09-27 13:30:00.45+1" AS t2
+)
+SELECT
+  fmt, input, zone
+  , PARSE_TIMESTAMP(fmt, input, zone) AS ts
+FROM (
+  SELECT '%Y%m%d-%H%M%S' AS fmt, '20181118-220800' AS input, '+0' as zone
+  UNION ALL SELECT '%c', 'Sat Nov 24 21:26:00 2018', 'America/Los_Angeles'
+  UNION ALL SELECT '%x %X', '11/18/18 22:08:00', 'UTC'
+)
+SELECT
+  ts, fmt
+  , FORMAT_TIMESTAMP(fmt, ts, '+6') AS ts_output
+FROM (
+  SELECT CURRENT_TIMESTAMP() AS ts, '%Y%m%d-%H%M%S' AS fmt
+  UNION ALL SELECT CURRENT_TIMESTAMP() AS ts, '%c' AS fmt
+  UNION ALL SELECT CURRENT_TIMESTAMP() AS ts, '%x %X' AS fmt
+)
+EXTRACT(WEEK('SATURDAY') FROM ts)SELECT
+  UNIX_MILLIS(TIMESTAMP "2018-11-25 22:30:00 UTC")
+  , UNIX_MILLIS(TIMESTAMP "1918-11-11 22:30:00 UTC") --invalid
+  , TIMESTAMP_MILLIS(1543185000000)
+SELECT 
+  EXTRACT(TIME FROM TIMESTAMP_ADD(t1, INTERVAL 1 HOUR)) AS plus_1h
+  , EXTRACT(TIME FROM TIMESTAMP_SUB(t1, INTERVAL 10 MINUTE)) AS minus_10min
+  , TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),
+             TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 MINUTE),
+             SECOND) AS plus_1min
+  , TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),
+             TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 1 MINUTE),
+             SECOND) AS minus_1min
+FROM (SELECT
+  TIMESTAMP "2017-09-27 12:30:00.45" AS t1
+)
+SELECT 
+  EXTRACT(DATETIME FROM CURRENT_TIMESTAMP()) as dt
+  , CAST(CURRENT_DATETIME() AS TIMESTAMP) as ts
+ST_GeogPoint(-122.33, 47.61)
+SELECT 
+  state_name
+FROM `bigquery-public-data`.utility_us.us_states_area
+WHERE
+   ST_Contains(
+     state_geom,
+     ST_GeogPoint(-122.33, 47.61))
+state_geom

@@ -1,0 +1,1071 @@
+
+    query = """
+        SELECT 
+          start_station_name
+          , AVG(duration) as avg_duration
+        FROM 
+          `bigquery-public-data`.london_bicycles.cycle_hire
+        WHERE 
+          start_station_name LIKE CONCAT('%', @STATION, '%')
+          AND duration BETWEEN @MIN_DURATION AND @MAX_DURATION
+        GROUP BY start_station_name
+    """
+'%@STATION%', 
+
+    query_params = [
+        bigquery.ScalarQueryParameter(
+            "STATION", "STRING", station_name),
+        bigquery.ScalarQueryParameter(
+            "MIN_DURATION", "FLOAT64", min_duration),
+        bigquery.ScalarQueryParameter(
+            "MAX_DURATION", "FLOAT64", max_duration),
+    ]
+
+
+    job_config = bigquery.QueryJobConfig()
+    job_config.query_parameters = query_params
+    query_job = client.query(
+        query,
+        location="EU",
+        job_config=job_config,
+    )
+    for row in query_job:
+        print("{}: \t{}".format(
+            row.start_station_name, row.avg_duration))
+
+def print_query_results(client,
+                        station_name, 
+                        min_duration=0, 
+                        max_duration=84000):
+
+client = bigquery.Client()
+print_query_results(client, 'Kennington', 300)
+print_query_results(client, 'Hyde Park', 600, 6000)
+
+Kennington between 300 and 84000
+Kennington Oval, Oval:  1269.0798128928543
+Doddington Grove, Kennington:   1243.7377963737788
+Kennington Road Post Office, Oval:      1360.2854550952536
+Kennington Lane Rail Bridge, Vauxhall:  991.4344845855808
+Cleaver Street, Kennington:     1075.6050140700947
+Kennington Cross, Kennington:   996.2538654101008
+Kennington Road  , Vauxhall:    1228.6673653660118
+Cotton Garden Estate, Kennington:       996.7003600110778
+Kennington Lane Tesco, Vauxhall:        929.6523615439942
+Kennington Station, Kennington:         1238.4088412072647
+______________________
+Hyde Park between 600 and 6000
+Bayswater Road, Hyde Park:      1614.2670577732417
+Wellington Arch, Hyde Park:     1828.9651324965134
+Hyde Park Corner, Hyde Park:    2120.4145144213744
+Cumberland Gate, Hyde Park:     1899.3282223532708
+Speakers' Corner 1, Hyde Park:  2070.2458069837776
+Triangle Car Park, Hyde Park:   1815.661582196573
+Albert Gate, Hyde Park:         1897.9349474341027
+Knightsbridge, Hyde Park:       1963.0815096317635
+Serpentine Car Park, Hyde Park:         1688.0595490490423
+Park Lane , Hyde Park:  2055.451932776309
+Speakers' Corner 2, Hyde Park:  2093.6202531645563
+______________________
+client.querydatetime.datetimefrom google.cloud import bigquery
+from datetime import datetime
+from datetime import timedelta
+import pytz
+
+def print_query_results(client, mid_time):
+    start_time = mid_time - timedelta(minutes=30)
+    end_time = mid_time + timedelta(minutes=30)
+
+    query = """
+        SELECT 
+          AVG(duration) as avg_duration
+        FROM 
+          `bigquery-public-data`.london_bicycles.cycle_hire
+        WHERE 
+          start_date BETWEEN @START_TIME AND @END_TIME
+    """
+    query_params = [
+        bigquery.ScalarQueryParameter(
+            "START_TIME", "TIMESTAMP", start_time),
+        bigquery.ScalarQueryParameter(
+            "END_TIME", "TIMESTAMP", end_time),
+    ]
+    job_config = bigquery.QueryJobConfig()
+    job_config.query_parameters = query_params
+    query_job = client.query(
+        query,
+        location="EU",
+        job_config=job_config,
+    )
+    for row in query_job:
+        print(row.avg_duration)
+    print("______________________")
+
+
+client = bigquery.Client()
+print_query_results(client, 
+        datetime(2015, 12, 25, 15, 0, tzinfo=pytz.UTC))
+3658.5000000000005 
+@run_timeTIMESTAMP@run_dateDATEdef print_query_results(client, params):
+    query = """
+        SELECT 
+          start_station_name
+          , AVG(duration) as avg_duration
+        FROM 
+          `bigquery-public-data`.london_bicycles.cycle_hire
+        WHERE 
+          start_station_name LIKE CONCAT('%', ?, '%')
+          AND duration BETWEEN ? AND ?
+        GROUP BY start_station_name
+    """
+    query_params = [
+        bigquery.ScalarQueryParameter(
+            None, "STRING", params[0]),
+        bigquery.ScalarQueryParameter(
+            None, "FLOAT64", params[1]),
+        bigquery.ScalarQueryParameter(
+            None, "FLOAT64", params[2]),
+    ]
+@STATIONSINUNNEST    query = """
+        SELECT 
+          start_station_id
+          , COUNT(*) as num_trips
+        FROM 
+          `bigquery-public-data`.london_bicycles.cycle_hire
+        WHERE 
+          start_station_id IN UNNEST(@STATIONS)
+          AND duration BETWEEN @MIN_DURATION AND @MAX_DURATION
+        GROUP BY start_station_id
+    """
+    query_params = [
+        bigquery.ArrayQueryParameter(
+            'STATIONS', "INT64", ids),
+        bigquery.ScalarQueryParameter(
+            'MIN_DURATION', "FLOAT64", min_duration),
+        bigquery.ScalarQueryParameter(
+            'MAX_DURATION', "FLOAT64", max_duration),
+    ]
+stationsprint_query_results(client, [270, 235, 62, 149], 300, 600)
+270:    26400
+149:    4143
+235:    8337
+62:     5954
+bigquery.StructQueryParameter(
+        "bicycle_trip",
+        bigquery.ScalarQueryParameter("start_station_id", "INT64", 62),
+        bigquery.ScalarQueryParameter("end_station_id", "INT64", 421),
+    )
+
+--dry_run
+CREATE TEMPORARY FUNCTION dayOfWeek(x TIMESTAMP) AS
+(
+  ['Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+     [ORDINAL(EXTRACT(DAYOFWEEK from x))]
+);
+CREATE TEMPORARY FUNCTION getDate(x TIMESTAMP) AS
+(
+  EXTRACT(DATE FROM x)
+);
+WITH overnight_trips AS (
+   SELECT
+     duration
+     , dayOfWeek(start_date) AS start_day
+   FROM 
+     `bigquery-public-data`.london_bicycles.cycle_hire
+   WHERE
+     getDate(start_date) != getDate(end_date)
+)
+SELECT
+   start_day
+   , COUNT(*) AS num_overnight_rentals
+   , AVG(duration)/3600 AS avg_duration_hours
+FROM 
+   overnight_trips
+GROUP BY
+   start_day
+ORDER BY num_overnight_rentals DESC
+ch08euCREATE OR REPLACE FUNCTION ch08eu.dayOfWeek(x TIMESTAMP) AS
+(
+  ['Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+     [ORDINAL(EXTRACT(DAYOFWEEK from x))]
+);
+CREATE FUNCTIONCREATE OR REPLACE FUNCTIONCREATE FUNCTION IF NOT EXISTSWITH overnight_trips AS (
+   SELECT
+     duration
+     , ch08eu.dayOfWeek(start_date) AS start_day
+   FROM 
+     `bigquery-public-data`.london_bicycles.cycle_hire
+   ...
+bigquery.routines.listbigquery.routines.[create/get/update/delete] allAuthenticatedUsersAVGMEDIANCREATE OR REPLACE FUNCTION fhoffa.x.median (arr ANY TYPE) AS ((
+  SELECT IF (MOD(ARRAY_LENGTH(arr), 2) = 0,
+     (  arr[OFFSET(DIV(ARRAY_LENGTH(arr), 2) - 1)] +     
+        arr[OFFSET(DIV(ARRAY_LENGTH(arr), 2))]     ) / 2,
+     arr[OFFSET(DIV(ARRAY_LENGTH(arr), 2))]
+  )
+  FROM (SELECT ARRAY_AGG(x ORDER BY x) AS arr FROM UNNEST(arr) AS x)
+));
+xfhoffaSELECT 
+  start_station_name
+  , COUNT(*) AS num_trips
+  , fhoffa.x.median(ARRAY_AGG(tripduration)) AS typical_duration
+FROM `bigquery-public-data`.new_york_citibike.citibike_trips -- london_bicycles.cycle_hire 
+GROUP BY start_station_name
+HAVING num_trips > 1000
+ORDER BY typical_duration DESC
+LIMIT 5
+
+fhoffa.x SELECT
+  start_date,
+  COUNT(*) AS num_long_trips
+FROM -- "first from"
+  (SELECT 
+      start_station_name
+      , duration
+      , EXTRACT(DATE from start_date) AS start_date
+    FROM 
+      `bigquery-public-data`.london_bicycles.cycle_hire
+    WHERE 
+       start_station_name = end_station_name) AS roundtrips
+WHERE -- "outer where"
+   duration > 2*(
+      SELECT 
+        AVG(duration) as avg_duration
+      FROM 
+        `bigquery-public-data`.london_bicycles.cycle_hire
+      WHERE 
+         start_station_name = end_station_name
+         AND roundtrips.start_station_name = start_station_name
+  )
+GROUP BY start_date
+ORDER BY num_long_trips DESC
+LIMIT 5
+
+FROMWHEREstart_station_namedurationend_station_nameWITH roundtrips AS (
+SELECT 
+  start_station_name
+  , duration
+  , EXTRACT(DATE from start_date) AS start_date
+FROM 
+  `bigquery-public-data`.london_bicycles.cycle_hire
+WHERE 
+   start_station_name = end_station_name
+),
+
+station_avg AS (
+SELECT 
+  start_station_name
+  , AVG(duration) as avg_duration
+FROM 
+  roundtrips
+GROUP BY start_station_name
+)
+
+SELECT
+  start_date,
+  COUNT(*) AS num_long_trips
+FROM
+  roundtrips
+JOIN station_avg USING(start_station_name)
+WHERE duration > 2*avg_duration
+GROUP BY start_date
+ORDER BY num_long_trips DESC
+LIMIT 5
+roundtripsstation_avgWITH params AS (
+  SELECT 600 AS DURATION_THRESH
+)
+SELECT 
+  start_station_name 
+  , COUNT(duration) as num_trips
+FROM 
+  `bigquery-public-data`.london_bicycles.cycle_hire
+  , params 
+WHERE duration >= DURATION_THRESH
+GROUP BY start_station_name 
+ORDER BY num_trips DESC
+LIMIT 5
+WITHFROMDURATION_THRESHSELECT
+  bike_id,
+  COUNT(*) AS num_trips
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+GROUP BY
+  bike_id
+ORDER BY
+  num_trips DESC
+LIMIT
+  100
+ORDER BYLIMITARRAY_AGG
+WITH numtrips AS (
+  SELECT
+    bike_id AS id,
+    COUNT(*) AS num_trips
+  FROM
+    `bigquery-public-data`.london_bicycles.cycle_hire
+  GROUP BY
+    bike_id
+)
+
+SELECT
+  ARRAY_AGG(STRUCT(id,num_trips) 
+            ORDER BY num_trips DESC LIMIT 100) 
+        AS bike
+FROM
+  numtrips
+SELECT 
+  ein
+  , ARRAY_AGG(STRUCT(elf, tax_pd, subseccd)) AS filing
+FROM `bigquery-public-data`.irs_990.irs_990_2015
+WHERE ein BETWEEN '390' AND '399'
+GROUP BY ein
+LIMIT 3
+elf'E'SELECT 
+  ein
+FROM `bigquery-public-data`.irs_990.irs_990_2015
+WHERE elf != 'E'
+SELECT 
+  ein
+  , COUNTIF(elf = 'E', 1, 0) AS num_elf
+  , COUNTIF(elf = 'E', 0, 1) AS num_not_elf
+FROM `bigquery-public-data`.irs_990.irs_990_2015
+GROUP BY ein
+HAVING num_elf > 0 AND num_not_elf > 0
+ORDER BY num_elf DESC
+LIMIT 3
+SELECT
+  ein
+FROM
+  [TABLENAME]
+WHERE
+  'E' NOT IN (SELECT elf FROM UNNEST(filing))
+LIMIT 5UNNESTFROMelffiling'E' SELECT
+  ein
+FROM
+  [TABLENAME]
+WHERE
+  EXISTS (SELECT elf FROM UNNEST(filing) WHERE elf != 'E')
+LIMIT 5
+SELECT
+  GENERATE_DATE_ARRAY('2019-06-23', '2019-08-22', INTERVAL 10 DAY) AS summer
+UNNESTdayssummerFROMUNNESTFROMWITH days AS (
+ SELECT
+  GENERATE_DATE_ARRAY('2019-06-23', '2019-08-22', INTERVAL 10 DAY) AS summer
+)
+SELECT summer_day 
+FROM days, UNNEST(summer) AS summer_day
+CROSS JOINNULLLEFT JOINFROM days LEFT JOIN UNNEST(summer) AS summer_day
+SELECT ['Lak', 'Jordan', 'Graham'] AS minions
+daynoWITH days AS (
+  SELECT
+    GENERATE_DATE_ARRAY('2019-06-23', '2019-08-22', 
+                         INTERVAL 10 DAY) AS summer,
+    ['Lak', 'Jordan', 'Graham'] AS minions
+)
+
+SELECT 
+   summer[ORDINAL(dayno)] AS summer_day
+   , minions[OFFSET(MOD(dayno, 
+                        ARRAY_LENGTH(minions)))]
+         AS minion
+FROM 
+  days, UNNEST(GENERATE_ARRAY(1,ARRAY_LENGTH(summer),1)) dayno
+ORDER BY summer_day ASC
+ORDINALOFFSETARRAY_LENGTHsummerARRAY_CONCATSELECT
+  ARRAY_CONCAT(
+    GENERATE_DATE_ARRAY('2019-03-23', '2019-06-22', INTERVAL 20 DAY)
+    , GENERATE_DATE_ARRAY('2019-08-23', '2019-11-22', INTERVAL 20 DAY)
+  ) AS shoulder_season
+ARRAY_TO_STRINGSELECT
+ARRAY_TO_STRING(['A', 'B', NULL, 'D'], '*', 'na') AS arr
+ARRAY_TO_STRINGNULLSELECT
+TO_JSON_STRING(
+ GENERATE_DATE_ARRAY('2019-06-23', '2019-08-22', 
+                     INTERVAL 10 DAY)) AS json
+SELECT
+TO_JSON_STRING([
+   STRUCT(1 AS a, 'bbb' AS b),
+   STRUCT(2 AS a, 'ccc' AS b)
+]) AS json
+minionsGENERATE_ARRAY
+GENERATE_DATE_ARRAY
+SELECT
+GENERATE_ARRAY(10, 20, 3)
+OFFSET
+ORDINAL
+SELECT minions[OFFSET(0)] FROM …
+SELECT minions[ORDINAL(1)] FROM ...
+ARRAY_LENGTH
+SELECT ARRAY_LENGTH(minions)
+UNNEST
+WITH workers AS (
+  SELECT ['Lak', 'Jordan', 'Graham'] 
+     AS minions  
+)
+SELECT m
+FROM workers, UNNEST(minions) AS m
+IN
+
+WITH workers AS (
+  SELECT ['Lak', 'Jordan', 'Graham'] 
+     AS minions  
+)
+SELECT 'Lak' IN UNNEST(minions)
+FROM workers
+EXISTS
+WITH workers AS (
+  SELECT ['Lak', 'Jordan', 'Graham'] AS minions
+  UNION ALL SELECT [] AS minions
+)
+
+SELECT
+  EXISTS (SELECT * FROM 
+          UNNEST(minions))
+FROM workers
+ARRAY_AGG
+SELECT 
+  ein
+  , ARRAY_AGG(elf) AS elf
+FROM `bigquery-public-data`.irs_990.irs_990_2015
+GROUP BY ein
+LIMIT 3
+ARRAY_CONCAT
+SELECT 
+  ARRAY_CONCAT( ['A', 'B', 'C'],
+                ['D', 'E', 'F'])
+ARRAY_TO_STRING
+TO_JSON_STRING
+SELECT TO_JSON_STRING([
+  STRUCT(1 AS a, 'bbb' AS b),
+  STRUCT(2 AS a, 'ccc' AS b)
+])
+SELECT
+  MAX(duration) AS longest_duration
+  , COUNT(*) AS num_trips
+  , AVG(duration) AS average_duration
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+SELECT
+  AVG(duration) 
+    OVER(ORDER BY start_date ASC 
+         ROWS BETWEEN 100 PRECEDING AND 1 PRECEDING)
+    AS average_duration
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+LIMIT 5
+AVG(duration)OVERstart_dateaverage_durationnullROWS BETWEEN 50 PRECEDING AND 50 FOLLOWINGROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROWROWS 50 PRECEDING
+ROWS BETWEEN 50 PRECEDING AND CURRENT ROW
+PARTITION BYOVER()SELECT
+  AVG(duration) 
+    OVER(PARTITION BY start_station_id
+         ORDER BY start_date ASC 
+         ROWS BETWEEN 100 PRECEDING AND 1 PRECEDING)
+    AS average_duration
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+LIMIT 5
+RANGESELECT
+  AVG(duration) 
+    OVER(PARTITION BY start_station_id
+         ORDER BY UNIX_SECONDS(start_date) ASC 
+         RANGE BETWEEN 3600 PRECEDING AND CURRENT ROW)
+    AS average_duration
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+LIMIT 5
+OVER()bike_idstart_dateLAST_VALUESELECT
+  start_date
+  , end_date
+  , LAST_VALUE(start_date)
+      OVER(PARTITION BY bike_id
+           ORDER BY start_date ASC 
+           ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING)
+     AS next_rental_start
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+LIMIT 5
+SELECT
+  start_date
+  , end_date
+  , LEAD(start_date, 1)
+      OVER(PARTITION BY bike_id
+           ORDER BY start_date ASC )
+     AS next_rental_start
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+LIMIT 5
+LEADLAST_VALUELEADFIRST_VALUELAGNTH_VALUESELECT
+  start_station_id
+  , duration
+  , RANK() 
+      OVER(PARTITION BY start_station_id ORDER BY duration DESC)
+      AS nth_longest
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+LIMIT 5
+RANKSELECTWITHstart_station_idARRAY_AGGWITH longest_trips AS (
+  SELECT
+    start_station_id
+    , duration
+    , RANK() 
+        OVER(PARTITION BY start_station_id ORDER BY duration DESC)
+        AS nth_longest
+  FROM
+    `bigquery-public-data`.london_bicycles.cycle_hire
+)
+
+SELECT 
+  start_station_id
+  , ARRAY_AGG(duration ORDER BY nth_longest LIMIT 3) AS durations
+FROM
+  longest_trips
+GROUP BY start_station_id
+LIMIT 5
+RANK(),DENSE_RANK()ROW_NUMBER()WITH example AS (
+  SELECT 'A' AS name, 32 AS age
+  UNION ALL SELECT 'B', 32
+  UNION ALL SELECT 'C', 33
+  UNION ALL SELECT 'D', 33
+  UNION ALL SELECT 'E', 34
+)
+
+SELECT 
+  name
+  , age
+  , RANK() OVER(ORDER BY age) AS rank
+  , DENSE_RANK() OVER(ORDER BY age) AS dense_rank
+  , ROW_NUMBER() OVER(ORDER BY age) AS row_number
+FROM example
+RANK()DENSE_RANK()ROW_NUMBER()SELECT 
+  ein
+  , ARRAY_AGG(STRUCT(elf, tax_pd, subseccd)) AS filing
+FROM `bigquery-public-data`.irs_990.irs_990_2015
+GROUP BY ein
+elftax_pdsubseccdirs_990_2015irs_990 SELECT column_name
+FROM `bigquery-public-data`.irs_990.INFORMATION_SCHEMA.COLUMNS
+WHERE table_name = 'irs_990_2015'
+WITH columns AS (
+  SELECT column_name
+  FROM `bigquery-public-data`.irs_990.INFORMATION_SCHEMA.COLUMNS
+  WHERE table_name = 'irs_990_2015' AND column_name != 'ein'
+)
+
+SELECT CONCAT(
+  'SELECT ein, ARRAY_AGG(STRUCT(',
+  ARRAY_TO_STRING(ARRAY(SELECT column_name FROM columns), ',\n   '),    
+  '\n) FROM `bigquery-public-data`.irs_990.irs_990_2015\n',
+  'GROUP BY ein')
+SELECT ein, ARRAY_AGG(STRUCT(ein,
+   elf,
+   tax_pd,
+   subseccd,
+  ...
+   othrinc509,
+   totsupp509
+) FROM `bigquery-public-data`.irs_990.irs_990_2015
+GROUP BY ein
+component:salesportalteam:emeasalesenvironment:productionstate:validateddevelopmentstagingtestproductionch08euALTER TABLE SET OPTIONSbq update --set_label costcenter:abc342 ch08eu
+bq update --set_label costcenter:def456 ch08eu
+bq query --label costcenter:def456 --nouse_legacy_sql 'SELECT ...'
+bq ls --filter 'labels.costcenter:def456'
+  datasetId  
+ ----------- 
+  ch08eu     
+SYSTEM_TIMESELECT 
+  * 
+FROM `bigquery-public-data`.london_bicycles.cycle_stations
+FOR SYSTEM_TIME AS OF 
+    TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 6 HOUR)
+CREATE OR REPLACE TABLE ch08eu.hydepark_stations AS 
+SELECT 
+  * EXCEPT(longitude, latitude)
+  , ST_GeogPoint(longitude, latitude) AS location
+FROM `bigquery-public-data`.london_bicycles.cycle_stations
+WHERE name LIKE '%Hyde%'
+CREATE OR REPLACE TABLE ch08eu.hydepark_stations 
+OPTIONS(
+  expiration_timestamp=TIMESTAMP "2020-01-01 00:00:00 UTC",
+  description="Stations with Hyde Park in the name",
+  labels=[("cost_center", "abc123")]
+) AS 
+SELECT 
+  * EXCEPT(longitude, latitude)
+  , ST_GeogPoint(longitude, latitude) AS location
+FROM `bigquery-public-data.london_bicycles.cycle_stations`
+WHERE name LIKE '%Hyde%'CREATE OR REPLACE TABLE ch08eu.hydepark_rides
+(
+  start_time TIMESTAMP,
+  duration INT64,
+  start_station_id INT64,
+  start_station_name STRING,
+  end_station_id INT64,
+  end_station_name STRING  
+)
+PARTITION BY DATE(start_time)
+CLUSTER BY start_station_id
+ALTER TABLE ch08eu.hydepark_rides 
+SET OPTIONS(
+  expiration_timestamp=TIMESTAMP "2021-01-01 00:00:00 UTC",
+  require_partition_filter=True,
+  labels=[("cost_center", "def456")]
+)
+UPDATEMERGEcycle_hireshydepark_ridesINSERT ch08eu.hydepark_rides
+SELECT 
+  start_date AS start_time
+  , duration
+  , start_station_id
+  , start_station_name
+  , end_station_id
+  , end_station_name
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+WHERE
+  start_station_name LIKE '%Hyde%'
+WITH rides_in_year AS (
+SELECT 
+  EXTRACT(MONTH from start_time) AS month
+  , duration
+FROM ch08eu.hydepark_rides 
+WHERE 
+  DATE(start_time) BETWEEN '2016-01-01' AND '2016-12-31' 
+  AND start_station_id = 300 
+  AND end_station_id = 303
+)
+
+SELECT 
+  month
+  , AVG(duration)/60 as avg_duration_minutes
+FROM rides_in_year 
+GROUP BY month
+ORDER BY avg_duration_minutes DESC
+LIMIT 5
+require_partition_filter=True CLUSTER BY start_station_id.INSERTINSERT ch08eu.hydepark_rides ( 
+  start_time
+  , duration
+  , start_station_id
+  , start_station_name
+  , end_station_id
+  , end_station_name
+)
+VALUES 
+('2016-02-18 17:21:00 UTC', 720, 300, 
+'Serpentine Car Park, Hyde Park', 303, 'Albert Gate, Hyde Park'),
+('2016-02-18 16:30:00 UTC', 1320, 300, 
+'Serpentine Car Park, Hyde Park', 303, 'Albert Gate, Hyde Park')
+'Albert Gate, Hyde Park' 'Hyde Park: Albert Gate'...
+VALUES 
+('2016-02-18 17:21:00 UTC', 720, 
+  300, (SELECT name FROM `bigquery-public-data`.london_bicycles.cycle_stations WHERE id = 300), 
+  303, (SELECT name FROM `bigquery-public-data`.london_bicycles.cycle_stations WHERE id = 303)),
+...
+CREATE TEMPORARY FUNCTION stationName(stationId INT64) AS(
+  (SELECT name FROM
+   `bigquery-public-data`.london_bicycles.cycle_stations
+   WHERE id = stationId)
+);
+DELETE ch08eu.hydepark_rides
+WHERE
+  start_time > '2016-12-01' AND
+  (duration IS NULL OR duration = 0)DELETE ch08eu.hydepark_rides
+WHERE
+  userId = 3452123
+MERGEUPDATE ch08eu.hydepark_rides
+SET duration = duration * 60
+WHERE
+  start_time > '2016-12-01' AND
+  start_station_id = 303maintenanceUPDATE ch08eu.stations_table
+SET maintenance = ARRAY_CONCAT(maintenance,
+  ARRAY_STRUCT<time TIMESTAMP, employeeID STRING>[
+      (CURRENT_TIME(), emp303)
+  ])
+)
+WHERE id = 303
+MERGEINSERTUPDATEDELETEMATCHEDNOT MATCHED BY TARGETNOT MATCHED BY SOURCEch08euMERGE ch08eu.hydepark_stations T
+USING 
+  (SELECT *
+   FROM `bigquery-public-data`.london_bicycles.cycle_stations
+   WHERE name LIKE '%Hyde%') S
+ON T.id = S.id
+WHEN MATCHED THEN
+   UPDATE
+   SET bikes_count = S.bikes_count 
+WHEN NOT MATCHED BY TARGET THEN
+   INSERT(id, installed, locked, name, bikes_count)
+   VALUES(id, installed, locked,name, bikes_count)
+WHEN NOT MATCHED BY SOURCE THEN
+   DELETE
+ch08eu.hydepark_stationsidbikes_countbikes_countcomputePrice()CREATE OR REPLACE FUNCTION ch08eu.computePrice(dur INT64)
+RETURNS INT64
+LANGUAGE js AS """
+  function factorial(n) {
+    return (n > 1) ? n * factorial(n - 1) : 1;
+  }
+  var nhours = 1 + Math.floor(dur/3600.0);
+  var f = factorial(nhours);
+  var discount = 0.8/(1+Math.pow(Math.E, -f));
+  return 3 + Math.floor(dur * (1-discount) * 0.0023)
+""";
+
+SELECT 
+  duration, ch08eu.computePrice(duration) AS price
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+LIMIT 5
+mathfn.jsmathfn.jsCREATE TEMPORARY FUNCTION computePrice(dur INT64)
+RETURNS INT64
+LANGUAGE js AS """
+  var nhours = 1 + Math.floor(dur/3600.0);
+  var f = factorial(nhours);
+  var discount = 0.8/(1+Math.pow(Math.E, -f));
+  return 3 + Math.floor(dur * (1-discount) * 0.0023)
+"""
+OPTIONS (
+  library=["gs://somebucket/path/to/mathfn.js",
+           "gs://somebucket/path/to/someother.js"]
+);
+CREATE OR REPLACE TABLE ch08eu.typical_trip AS
+  SELECT
+      start_station_name
+      , end_station_name
+      , APPROX_QUANTILES(duration, 10)[OFFSET(5)] AS typical_duration
+      , COUNT(*) AS num_trips
+  FROM
+    `bigquery-public-data`.london_bicycles.cycle_hire
+  GROUP BY
+    start_station_name, end_station_name  
+;
+
+CREATE OR REPLACE TABLE ch08eu.unusual_days AS
+  SELECT 
+     EXTRACT (DATE FROM start_date) AS trip_date
+     , APPROX_QUANTILES(duration / typical_duration, 10)[OFFSET(5)] AS ratio
+     , COUNT(*) AS num_trips_on_day
+  FROM 
+    `bigquery-public-data`.london_bicycles.cycle_hire AS hire
+    , ch08eu.typical_trip AS trip
+  WHERE
+     hire.start_station_name = trip.start_station_name 
+     AND hire.end_station_name = trip.end_station_name
+     AND num_trips > 10
+  GROUP BY trip_date
+  HAVING num_trips_on_day > 10
+  ORDER BY ratio DESC
+;
+
+DROP TABLE ch08eu.typical_trip;
+WITHGROUP BYbike_idthresholdCREATE TEMPORARY TABLE typical_trip AS
+  SELECT
+      start_station_name
+      , end_station_name
+      , APPROX_QUANTILES(duration, 10)[OFFSET(5)] AS typical_duration
+      , COUNT(*) AS num_trips
+  FROM
+    `bigquery-public-data`.london_bicycles.cycle_hire
+  GROUP BY
+    start_station_name, end_station_name  
+;
+
+CREATE OR REPLACE TABLE ch08eu.unusual_days AS
+  SELECT 
+     EXTRACT (DATE FROM start_date) AS trip_date
+     , APPROX_QUANTILES(duration / typical_duration, 10)[OFFSET(5)] AS ratio
+     , COUNT(*) AS num_trips_on_day
+  FROM 
+    `bigquery-public-data`.london_bicycles.cycle_hire AS hire
+    , typical_trip AS trip
+  WHERE
+     hire.start_station_name = trip.start_station_name 
+     AND hire.end_station_name = trip.end_station_name
+     AND num_trips > 10
+  GROUP BY trip_date
+  HAVING num_trips_on_day > 10
+  ORDER BY ratio DESC
+;
+-- Variables
+DECLARE PATTERN STRING DEFAULT '%Hyde%';
+DECLARE stations ARRAY<STRING>;
+DECLARE MIN_TRIPS_THRESH INT64 DEFAULT 100;
+SET stations = (
+  SELECT
+     ARRAY_AGG(name)
+  FROM
+    `bigquery-public-data`.london_bicycles.cycle_stations
+  WHERE
+    name LIKE PATTERN
+);
+SETPATTERNSELECTARRAY_AGGUNNESTSELECT
+  start_station_name
+  , end_station_name
+  , AVG(duration) AS avg_duration
+  , COUNT(duration) AS num_trips
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+  , UNNEST(stations) AS station
+WHERE
+  start_station_name = station
+GROUP BY start_station_name, end_station_name
+HAVING num_trips > MIN_TRIPS_THRESH
+ORDER BY avg_duration DESC
+LIMIT 5
+MIN_TRIPS_THRESHSELECTWHILE MIN_TRIPS_THRESH < 1000 DO
+  SELECT … ;
+
+  SET MIN_TRIPS_THRESH = MIN_TRIPS_THRESH * 2;
+END WHILE
+WHILELOOP
+  IF MIN_TRIPS_THRESH >= 1000 THEN
+    BREAK;
+  END IF;
+
+  SELECT MIN_TRIPS_THRESH;
+  SET MIN_TRIPS_THRESH = MIN_TRIPS_THRESH * 2;
+END LOOP;
+LOOPWHILEBREAKCONTINUE.CREATE OR REPLACE PROCEDURE ch08eu.sp_unusual_trips()
+BEGIN
+
+-- Script starts here
+CREATE TEMPORARY TABLE typical_trip AS
+  SELECT
+      start_station_name
+      , end_station_name
+      , APPROX_QUANTILES(duration, 10)[OFFSET(5)] AS typical_duration
+      , COUNT(*) AS num_trips
+  FROM
+    `bigquery-public-data`.london_bicycles.cycle_hire
+  GROUP BY
+    start_station_name, end_station_name
+;
+
+CREATE OR REPLACE TABLE ch08eu.unusual_days AS
+  SELECT
+     EXTRACT (DATE FROM start_date) AS trip_date
+     , APPROX_QUANTILES(duration / typical_duration, 10)[OFFSET(5)] AS ratio
+     , COUNT(*) AS num_trips_on_day
+  FROM
+    `bigquery-public-data`.london_bicycles.cycle_hire AS hire
+    , typical_trip AS trip
+  WHERE
+     hire.start_station_name = trip.start_station_name
+     AND hire.end_station_name = trip.end_station_name
+     AND num_trips > 10
+  GROUP BY trip_date
+  HAVING num_trips_on_day > 10
+  ORDER BY ratio DESC
+;
+-- Script ends here
+
+END;
+CALL ch08eu.sp_unusual_trips();
+MIN_TRIPS_THRESH CREATE OR REPLACE PROCEDURE ch08eu.sp_most_unusual(
+   IN MIN_TRIPS_THRESH INT64, 
+   OUT result ARRAY<STRUCT<trip_date DATE, ratio FLOAT64, num_trips_on_day INT64>>)
+
+BEGIN
+  CREATE TEMPORARY TABLE typical_trip AS
+    SELECT
+        start_station_name
+        , end_station_name
+        , APPROX_QUANTILES(duration, 10)[OFFSET(5)] AS typical_duration
+        , COUNT(*) AS num_trips
+    FROM
+      `bigquery-public-data`.london_bicycles.cycle_hire
+    GROUP BY
+      start_station_name, end_station_name
+  ;
+
+  SET result = (
+    WITH unusual_trips AS (
+      SELECT
+         EXTRACT (DATE FROM start_date) AS trip_date
+         , APPROX_QUANTILES(duration / typical_duration, 10)[OFFSET(5)] AS ratio
+         , COUNT(*) AS num_trips_on_day
+      FROM
+        `bigquery-public-data`.london_bicycles.cycle_hire AS hire
+        , typical_trip AS trip
+      WHERE
+         hire.start_station_name = trip.start_station_name
+         AND hire.end_station_name = trip.end_station_name
+         AND num_trips > MIN_TRIPS_THRESH
+      GROUP BY trip_date
+      HAVING num_trips_on_day > MIN_TRIPS_THRESH
+    ) 
+    SELECT 
+    ARRAY_AGG(STRUCT(trip_date, ratio, num_trips_on_day) ORDER BY ratio DESC LIMIT 3)
+    FROM unusual_trips
+  );
+ 
+END;
+DECLARE y ARRAY<STRUCT<trip_date DATE, ratio FLOAT64, num_trips_on_day INT64>>;
+CALL ch08eu.sp_most_unusual(10, y);
+SELECT y;
+ST_GeogPoint longitudeSELECT
+  name
+  , ST_GeogPoint(longitude, latitude) AS location
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_stations
+WHERE
+  id BETWEEN 300 and 305
+CREATE OR REPLACE TABLE ch08eu.cycle_stations AS
+SELECT
+  *, ST_GeogPoint(longitude, latitude) AS location
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_stations
+ST_GeogFromTextST_GeogFromGeoJSONST_AsTextST_AsGeoJSON SELECT
+  name
+  , ST_AsGeoJSON(location) AS location_string
+FROM
+  ch08eu.cycle_stations
+WHERE
+  id BETWEEN 300 and 305ST_MakeLineST_MakePolygonWITH stations AS (
+SELECT
+  (SELECT location FROM ch08eu.cycle_stations WHERE id = 300) 
+      AS loc300,
+  (SELECT location FROM ch08eu.cycle_stations WHERE id = 302) 
+      AS loc302,
+  (SELECT location FROM ch08eu.cycle_stations WHERE id = 305) 
+      AS loc305
+)
+
+SELECT
+  ST_MakeLine(loc300, loc305) AS seg1
+  , ST_MakePolygon(ST_MakeLine(
+      [loc300, loc305, loc302])) AS poly
+FROM
+  stations
+SELECT
+  state_code
+  , zip_code
+  , ST_GeoHash(internal_point, 2) AS ziphash_2
+  , ST_GeoHash(internal_point, 5) AS ziphash_5
+  , ST_GeoHash(internal_point, 10) AS ziphash_10
+FROM
+  `bigquery-public-data`.geo_us_boundaries.us_zip_codes
+WHERE 
+  state_code = 'AK'
+ORDER BY ziphash_10 ASC
+LIMIT 5
+WHEREJOINsSELECT
+     z.zip_code
+     , COUNT(*) AS num_stations
+FROM
+    `bigquery-public-data`.new_york.citibike_stations AS s,
+    `bigquery-public-data`.geo_us_boundaries.us_zip_codes AS z
+WHERE 
+   ST_DWithin(
+         z.zcta_geom,
+         ST_GeogPoint(s.longitude, s.latitude),
+         1000) -- 1km
+GROUP BY z.zip_code
+ORDER BY num_stations DESC
+LIMIT 5
+ST_DWithinST_IntersectsST_ContainsST_CoveredByST_DistanceWITH seattle AS (
+  SELECT ANY_VALUE(internal_point) as loc
+  FROM  `bigquery-public-data`.geo_us_boundaries.us_zip_codes
+  WHERE city = 'Seattle' and state_code = 'WA'
+),
+miami AS (
+  SELECT ANY_VALUE(internal_point) as loc
+  FROM  `bigquery-public-data`.geo_us_boundaries.us_zip_codes
+  WHERE city = 'Miami city' and state_code = 'FL'
+)
+
+SELECT 
+  ST_Distance(seattle.loc, miami.loc)/1000 AS dist
+FROM seattle, miami
+ANY_VALUEST_SnapToGridST_SnapToGrid(pt, 0.01)ptST_UNIONWITH seattle AS (
+  SELECT ST_UNION(ARRAY_AGG(zcta_geom)) as loc
+  FROM  `bigquery-public-data`.geo_us_boundaries.us_zip_codes
+  WHERE city = 'Seattle' and state_code = 'WA'
+),
+miami AS (
+  SELECT ST_UNION(ARRAY_AGG(zcta_geom)) as loc
+  FROM  `bigquery-public-data`.geo_us_boundaries.us_zip_codes
+  WHERE city = 'Miami city' and state_code = 'FL'
+)
+
+SELECT 
+  ST_Distance(seattle.loc, miami.loc)/1000 AS dist
+FROM seattle, miami
+
+ST_UNION_AGGWITH seattle AS (
+  SELECT ST_UNION_AGG(zcta_geom) as loc
+  FROM  `bigquery-public-data`.geo_us_boundaries.us_zip_codes
+  WHERE city = 'Seattle' and state_code = 'WA'
+)
+ST_CENTROID_AGGWITH seattle AS (
+  SELECT ST_CENTROID_AGG(zcta_geom) as loc
+  FROM  `bigquery-public-data`.geo_us_boundaries.us_zip_codes
+  WHERE city = 'Seattle' and state_code = 'WA'
+),
+miami AS (
+  SELECT ST_CENTROID_AGG(zcta_geom) as loc
+  FROM  `bigquery-public-data`.geo_us_boundaries.us_zip_codes
+  WHERE city = 'Miami city' and state_code = 'FL'
+)
+
+SELECT 
+  ST_Distance(seattle.loc, miami.loc)/1000 AS dist
+FROM seattle, miami
+SELECT
+  MIN(duration) AS min_duration
+  , MAX(duration) AS max_duration
+  , COUNT(duration) AS num_duration
+  , AVG(duration) AS avg_duration
+  , SUM(duration) AS total_duration
+  , STDDEV(duration) AS stddev_duration
+  , VARIANCE(duration) AS variance_duration
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+APPROX_QUANTILESSELECT
+  APPROX_QUANTILES(duration, 3)
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+SELECT
+  APPROX_QUANTILES(duration, 2)
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+SELECT
+  APPROX_QUANTILES(duration, 100)[OFFSET(95)]
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+WITH distances AS (
+  SELECT 
+     id
+     , ST_Distance(location, ST_GeogPoint(-0.12574, 51.50853)) AS distance
+  FROM
+     ch08eu.cycle_stations
+),
+durations AS (
+  SELECT
+     start_station_id AS id
+     , APPROX_QUANTILES(duration, 2)[OFFSET(1)] AS median_duration
+  FROM
+     `bigquery-public-data`.london_bicycles.cycle_hire
+  GROUP BY start_station_id
+)
+
+SELECT CORR(distance, median_duration) AS pearson
+FROM distances
+JOIN durations
+USING(id)
+WITH identifier AS (
+  SELECT
+    CONCAT(
+       CAST(bike_id AS STRING), '***',
+       CAST(start_date AS STRING), '***',
+       CAST(start_station_id AS STRING)
+     ) AS rowid
+  FROM `bigquery-public-data.london_bicycles.cycle_hire`
+  LIMIT 10
+)
+
+SELECT
+  rowid, FARM_FINGERPRINT(rowid) AS fingerprint
+FROM identifier
+SELECT 
+  name
+  , MD5(name) AS md5_
+  , SHA256(name) AS sha256_
+  , SHA512(name) AS sha512_
+FROM UNNEST(['Joe Customer', 'Jane Employee']) AS name
+SELECT GENERATE_UUID() AS uuid;
+SELECT RAND()
+

@@ -1,0 +1,302 @@
+#standardsql#standardsql
+SELECT DISTINCT genderFROM `bigquery-public-data`.new_york_citibike.citibike_trips
+#standardsql-- simple selectSELECT  gender, tripdurationFROM  `bigquery-public-data`.new_york_citibike.citibike_tripsLIMIT 5
+gendertripduration
+bigquery-public-data.new_york_citibike.citibike_tripsbigquery-public-datanew_york_citibikecitibike_tripsbigquery-public-datanew_yorknew_york_citibikecitibike_tripsbigquery-public-data-- simple selectSELECT  gender, tripdurationFROM  `bigquery-public-data.new_york_citibike.citibike_trips`LIMIT 5
+citibike_trips`bigquery-public-data`.new_york_citibike.citibike_trips -- Aliasing column names
+SELECT  gender, tripduration AS rental_durationFROM  `bigquery-public-data`.new_york_citibike.citibike_tripsLIMIT 5
+	
+SELECT  gender, tripduration/60FROM  `bigquery-public-data`.new_york_citibike.citibike_tripsLIMIT 5
+SELECT  gender, tripduration/60 AS duration_minutesFROM  `bigquery-public-data`.new_york_citibike.citibike_tripsLIMIT 5
+SELECT  gender, tripdurationFROM  `bigquery-public-data`.new_york_citibike.citibike_tripsWHERE tripduration < 600LIMIT 5
+SELECT  gender, tripdurationFROM  `bigquery-public-data`.new_york_citibike.citibike_tripsWHERE tripduration >= 300 AND tripduration < 600 AND gender = 'female'LIMIT 5
+WHERE tripduration < 600 AND NOT gender = 'female'
+WHERE (tripduration < 600 AND gender = 'female') OR gender = 'male'SELECT  gender, tripduration/60 AS minutesFROM  `bigquery-public-data`.new_york_citibike.citibike_tripsWHERE minutes < 10 -- CAN NOT REFERENCE ALIAS IN WHERELIMIT 5
+
+SELECT
+  gender, tripduration / 60 AS minutes
+FROM
+  `bigquery-public-data`.new_york_citibike.citibike_trips
+WHERE (tripduration / 60) < 10
+LIMIT 5SELECT *SELECT
+  *
+FROM
+  `bigquery-public-data`.new_york_citibike.citibike_stations
+WHERE name LIKE '%Riverside%'
+WHERELIKERiversideSELECT EXCEPTSELECT
+  * EXCEPT(short_name, last_reported)
+FROM
+  `bigquery-public-data`.new_york_citibike.citibike_stations
+WHERE name LIKE '%Riverside%'
+short_namelast_reportedSELECT
+  * REPLACE(num_bikes_available + 5 AS num_bikes_available)
+FROM
+  `bigquery-public-data`.new_york_citibike.citibike_stations
+SELECT * FROM (
+  SELECT
+    gender, tripduration / 60 AS minutes
+  FROM
+    `bigquery-public-data`.new_york_citibike.citibike_trips
+)
+WHERE minutes < 10
+LIMIT 5
+WITH all_trips AS (
+  SELECT
+    gender, tripduration / 60 AS minutes
+  FROM
+    `bigquery-public-data`.new_york_citibike.citibike_trips
+)
+
+SELECT * from all_trips
+WHERE minutes < 10
+LIMIT 5
+all_trips
+SELECT
+  gender, tripduration/60 AS minutes
+FROM
+  `bigquery-public-data`.new_york_citibike.citibike_trips
+WHERE gender = 'female'
+ORDER BY minutes DESC
+LIMIT 5
+
+
+SELECT  AVG(tripduration / 60) AS avg_trip_durationFROM  `bigquery-public-data`.new_york_citibike.citibike_tripsWHERE  gender = 'male'
+SELECT  gender, AVG(tripduration / 60) AS avg_trip_durationFROM  `bigquery-public-data`.new_york_citibike.citibike_tripsWHERE
+  tripduration is not NULL
+GROUP BY  gender
+ORDER BY  avg_trip_duration
+
+SELECT
+  gender,
+  COUNT(*) AS rides,
+  AVG(tripduration / 60) AS avg_trip_duration
+FROM
+  `bigquery-public-data`.new_york_citibike.citibike_trips
+WHERE
+  tripduration IS NOT NULL
+GROUP BY
+  gender
+ORDER BY
+  avg_trip_duration
+
+SELECT
+  gender, AVG(tripduration / 60) AS avg_trip_duration
+FROM
+  `bigquery-public-data`.new_york_citibike.citibike_trips
+WHERE tripduration IS NOT NULL
+GROUP BY
+  gender
+HAVING avg_trip_duration > 14
+ORDER BY
+  avg_trip_duration
+
+SELECT DISTINCT 
+   genderFROM  `bigquery-public-data`.new_york_citibike.citibike_trips
+SELECT 
+	bikeid,
+	tripduration,
+	gender
+FROM
+  `bigquery-public-data`.new_york_citibike.citibike_trips
+WHERE gender = ""
+LIMIT 100SELECT DISTINCT 
+  gender,
+  usertype
+FROM
+  `bigquery-public-data`.new_york_citibike.citibike_trips
+WHERE gender != ''
+SELECT
+  city, SPLIT(city, ' ') AS parts
+FROM (
+  SELECT * from UNNEST([
+     'Seattle WA', 'New York', 'Singapore'
+  ]) AS city
+)
+
+
+
+UNION ALLSELECTWITH example AS (
+  SELECT 'Sat' AS day, 1451 AS numrides, 1018 AS oneways
+  UNION ALL SELECT 'Sun', 2376, 936
+  UNION ALL SELECT 'Mon', 1476, 736
+)
+
+SELECT * from example
+WHERE numrides < 2000
+SELECT
+  gender
+  , EXTRACT(YEAR from starttime) AS year --
+  , COUNT(*) AS numtrips
+FROM
+  `bigquery-public-data`.new_york_citibike.citibike_trips
+WHERE gender != 'unknown' and starttime IS NOT NULL
+GROUP BY gender, year
+HAVING year > 2016
+SELECT
+  gender
+  , EXTRACT(YEAR from starttime) AS year
+  -- comment out this line , COUNT(1) AS numtrips
+FROM etc.
+SELECT 
+  gender
+  , ARRAY_AGG(numtrips order by year) AS numtrips
+FROM (
+  SELECT
+    gender
+    , EXTRACT(YEAR from starttime) AS year
+    , COUNT(1) AS numtrips
+  FROM
+    `bigquery-public-data`.new_york_citibike.citibike_trips
+  WHERE gender != 'unknown' and starttime IS NOT NULL
+  GROUP BY gender, year
+  HAVING year > 2016
+)
+GROUP BY gender
+AVG(numtrips)ARRAY_AGGARRAY[
+  {
+    "gender": "male",
+    "numtrips": [
+      "9306602",
+      "3955871"
+    ]
+  },
+  {
+    "gender": "female",
+    "numtrips": [
+      "3236735",
+      "1260893"
+    ]
+  }
+]
+numtripsWITH example AS (
+  SELECT true AS is_vowel, 'a' as letter, 1 as position
+  UNION ALL SELECT false, 'b', 2
+  UNION ALL SELECT false, 'c', 3
+)
+SELECT ARRAY_AGG(IF(position = 2, NULL, position)) as positions from example
+WITH example AS (
+  SELECT true AS is_vowel, 'a' as letter, 1 as position
+  UNION ALL SELECT false, 'b', 2
+  UNION ALL SELECT false, 'c', 3
+)
+SELECT ARRAY_LENGTH(ARRAY_AGG(IF(position = 2, NULL, position))) from exampleSELECT 
+  [
+    STRUCT('male' as gender, [9306602, 3955871] as numtrips)
+    , STRUCT('female' as gender, [3236735, 1260893] as numtrips)
+  ] AS bikerides
+SELECT 
+  [
+    ('male', [9306602, 3955871])
+    , ('female', [3236735, 1260893])
+  ]
+SELECT 
+  ARRAY_LENGTH(bikerides) as num_items
+  , bikerides[ OFFSET(0) ].gender as first_gender
+FROM
+(SELECT 
+  [
+    STRUCT('male' as gender, [9306602, 3955871] as numtrips)
+    , STRUCT('female' as gender, [3236735, 1260893] as numtrips)
+  ] AS bikerides)
+SELECT
+  [
+    STRUCT('male' as gender, [9306602, 3955871] as numtrips)
+    , STRUCT('female' as gender, [3236735, 1260893] as numtrips)
+  ]
+SELECT * from UNNEST(
+  [
+    STRUCT('male' as gender, [9306602, 3955871] as numtrips)
+    , STRUCT('female' as gender, [3236735, 1260893] as numtrips)
+  ])
+SELECT numtrips from UNNEST(
+  [
+    STRUCT('male' as gender, [9306602, 3955871] as numtrips)
+    , STRUCT('female' as gender, [3236735, 1260893] as numtrips)
+  ])
+WITH bicycle_rentals AS (  SELECT    COUNT(starttime) as num_trips,    EXTRACT(DATE from starttime) as trip_date  FROM `bigquery-public-data`.new_york_citibike.citibike_trips  GROUP BY trip_date),rainy_days AS(SELECT  date,  (MAX(prcp) > 5) AS rainyFROM (  SELECT    wx.date AS date,    IF (wx.element = 'PRCP', wx.value/10, NULL) AS prcp  FROM    `bigquery-public-data`.ghcn_d.ghcnd_2016 AS wx  WHERE    wx.id = 'USW00094728')GROUP BY  date)SELECT  ROUND(AVG(bk.num_trips)) AS num_trips,  wx.rainyFROM bicycle_rentals AS bkJOIN rainy_days AS wxON wx.date = bk.trip_dateGROUP BY wx.rainyWITHcitibike_tripsbicycle_rentals.'USW00094728' WITH bicycle_rentals AS (
+  SELECT
+    COUNT(starttime) as num_trips,
+    EXTRACT(DATE from starttime) as trip_date
+  FROM `bigquery-public-data`.new_york_citibike.citibike_trips
+  GROUP BY trip_date
+)
+SELECT * from bicycle_rentals LIMIT 5
+SELECT
+  bk.trip_date,  bk.num_trips,  wx.rainyFROM bicycle_rentals AS bkJOIN rainy_days AS wxON wx.date = bk.trip_dateLIMIT 5
+WITH from_item_a AS (
+  SELECT 'Dalles' as city, 'OR' as state
+  UNION ALL SELECT 'Tokyo', 'Tokyo'
+  UNION ALL SELECT 'Mumbai', 'Maharashtra'
+),
+
+from_item_b AS (
+  SELECT 'OR' as state, 'USA' as country
+  UNION ALL SELECT 'Tokyo', 'Japan'
+  UNION ALL SELECT 'Maharashtra', 'India'
+)
+
+SELECT from_item_a.*, country
+FROM from_item_a
+JOIN from_item_b
+ON from_item_a.state = from_item_b.state
+SELECT from_item_a.*, country AS surcharge
+FROM from_item_a
+JOIN from_item_b
+ON from_item_a.state != from_item_b.state
+WITH winners AS (
+  SELECT 'John' as person, '100m' as event
+  UNION ALL SELECT 'Hiroshi', '200m'
+  UNION ALL SELECT 'Sita', '400m'
+),
+gifts AS (
+  SELECT 'Google Home' as gift, '100m' as event
+  UNION ALL SELECT 'Google Hub', '200m'
+  UNION ALL SELECT 'Pixel3', '400m'
+)
+SELECT winners.*, gifts.gift
+FROM winners
+JOIN gifts
+WITH winners AS (
+  SELECT 'John' as person, '100m' as event
+  UNION ALL SELECT 'Hiroshi', '200m'
+  UNION ALL SELECT 'Sita', '400m'
+),
+gifts AS (
+  SELECT 'Google Home' as gift
+  UNION ALL SELECT 'Google Hub'
+  UNION ALL SELECT 'Pixel3'
+)
+SELECT person, gift
+FROM winners
+CROSS JOIN gifts
+SELECT from_item_a.*, from_item_b.*
+FROM from_item_a
+CROSS JOIN from_item_bSELECT from_item_a.*, from_item_b.*
+FROM from_item_a, from_item_bWITH winners AS (
+  SELECT 'John' as person, '100m' as event
+  UNION ALL SELECT 'Hiroshi', '200m'
+  UNION ALL SELECT 'Sita', '400m'
+  UNION ALL SELECT 'Kwame', '50m'
+),
+gifts AS (
+  SELECT 'Google Home' as gift, '100m' as event
+  UNION ALL SELECT 'Google Hub', '200m'
+  UNION ALL SELECT 'Pixel3', '400m'
+  UNION ALL SELECT 'Google Mini', '5000m'
+)
+SELECT person, gift
+FROM winners
+INNER JOIN gifts
+ON winners.event = gifts.event
+SELECT person, gift
+FROM winners
+FULL OUTER JOIN gifts
+ON winners.event = gifts.event
+SELECT person, gift
+FROM winners
+LEFT OUTER JOIN gifts
+ON winners.event = gifts.event
+SELECT person, gift
+FROM winners
+RIGHT OUTER JOIN gifts
+ON winners.event = gifts.event

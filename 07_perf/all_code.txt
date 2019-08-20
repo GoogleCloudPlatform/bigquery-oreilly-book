@@ -1,0 +1,877 @@
+bq--dry_run--maximum_bytes_billedINFORMATION_SCHEMASELECT
+   job_id
+   , query
+   , user_email
+   , total_bytes_processed
+   , total_slot_ms
+FROM `some-project`.INFORMATION_SCHEMA.JOBS_BY_PROJECT
+WHERE EXTRACT(YEAR FROM creation_time) = 2019
+ORDER BY total_bytes_processed DESC
+LIMIT 5
+total_bytes_processedtotal_slot_mstimecurlbashread -d '' QUERY_TEXT << EOF
+SELECT 
+  start_station_name
+  , AVG(duration) as duration
+  , COUNT(duration) as num_trips
+FROM \`bigquery-public-data\`.london_bicycles.cycle_hire
+GROUP BY start_station_name 
+ORDER BY num_trips DESC 
+LIMIT 5
+EOF
+
+read -d '' request << EOF
+{
+ "useLegacySql": false,
+ "useQueryCache": false,
+ "query": \"${QUERY_TEXT}\"
+}
+EOF
+request=$(echo "$request" | tr '\n' ' ')
+
+gcloudaccess_token=$(gcloud auth application-default print-access-token)
+PROJECT=$(gcloud config get-value project)
+
+NUM_TIMES=10
+time for i in $(seq 1 $NUM_TIMES); do
+echo -en "\r ... $i / $NUM_NUMTIMES ..."
+curl --silent \
+    -H "Authorization: Bearer $access_token"  \
+    -H "Content-Type: application/json" \
+    -X POST \
+    -d "$request" \
+    "https://www.googleapis.com/bigquery/v2/projects/$PROJECT/queries" > /dev/null
+done
+real	0m16.875s
+user	0m0.265s
+sys	0m0.109s
+read -d '' request << EOF
+{
+ "useLegacySql": false,
+ "useQueryCache": true,
+ "query": \"${QUERY_TEXT}\"
+}
+EOF
+real	0m6.760s
+user	0m0.264s
+sys	0m0.114s
+sudo apt-get -y install gradle
+brew install gradle
+git clone https://github.com/GoogleCloudPlatform/pontem.git
+cd pontem/BigQueryWorkloadTester
+gradle clean :BigQueryWorkloadTester:build
+cat <<EOF| tr '\n' ' ' > queries/busystations.sql
+SELECT 
+  start_station_name
+  , AVG(duration) as duration
+  , COUNT(duration) as num_trips
+FROM \`bigquery-public-data\`.london_bicycles.cycle_hire
+GROUP BY start_station_name 
+ORDER BY num_trips DESC 
+LIMIT 5
+EOF
+cat <<EOF>./config.yaml
+concurrencyLevel: 1
+isRatioBasedBenchmark: true
+benchmarkRatios: [1.0, 2.0]
+outputFileFolder: $OUTDIR
+workloads:
+- name: "Busy stations"
+  projectId: $PROJECT
+  queryFiles:
+    - queries/busystations.sql
+  outputFileName: busystations.json
+EOF
+concurrencyLevel: 10
+isRatioBasedBenchmark: true
+benchmarkRatios: [0.1, 0.25, 0.5, 1.0, 1.5, 2.0]gradle clean :BigQueryWorkloadTester:run
+ch05Warningch05euch05eucycle_stations_copych05eubad_bikesbad_bikescycle_stations_copycycle_stations_copybad_bikesbad_bikesSELECT
+  start_station_name,
+  AVG(duration) AS duration,
+  COUNT(duration) AS num_trips
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+GROUP BY
+  start_station_name
+ORDER BY
+  num_trips DESC
+LIMIT
+  5
+JOBID=8adbf3fd-e310-44bb-9c6e-88254958ccac   # CHANGE
+access_token=$(gcloud auth application-default print-access-token)
+PROJECT=$(gcloud config get-value project)
+curl --silent \
+    -H "Authorization: Bearer $access_token"  \
+    -X GET \
+    "https://www.googleapis.com/bigquery/v2/projects/$PROJECT/jobs/$JOBID"
+"waitRatioAvg": 0.058558558558558557,
+"readRatioAvg": 0.070270270270270274,
+"computeRatioAvg": 0.86036036036036034
+...
+"shuffleOutputBytes": "356596",
+"shuffleOutputBytesSpilled": "0",
+"recordsRead": "24369201",
+"recordsWritten": "6138",
+"parallelInputs": "7",
+durationstart_station_time, $1$2start_station_timedurationSELECTSELECT * bike_idSELECT
+  bike_id
+  , duration
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+ORDER BY duration DESC
+LIMIT 1
+SELECT
+  *
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+ORDER BY duration DESC
+LIMIT 1
+LIMITSELECT * LIMITSELECT * SELECT * EXCEPTSELECT
+  MIN(start_station_name) AS start_station_name
+  , MIN(end_station_name) AS end_station_name
+  , APPROX_QUANTILES(duration, 10)[OFFSET(5)] AS typical_duration
+  , COUNT(duration) AS num_trips
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+WHERE
+  start_station_id != end_station_id 
+GROUP BY
+  start_station_id, end_station_id
+ORDER BY num_trips DESC
+LIMIT 10
+SELECT
+  start_station_name
+  , end_station_name
+  , APPROX_QUANTILES(duration, 10)[OFFSET(5)] AS typical_duration
+  , COUNT(duration) AS num_trips
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+WHERE
+  start_station_name != end_station_name 
+GROUP BY
+  start_station_name, end_station_name
+ORDER BY num_trips DESC
+LIMIT 10
+WITH trip_distance AS (
+  SELECT
+    bike_id
+    , ST_Distance(ST_GeogPoint(s.longitude, s.latitude),
+                  ST_GeogPoint(e.longitude, e.latitude)) AS distance
+  FROM
+    `bigquery-public-data`.london_bicycles.cycle_hire,
+    `bigquery-public-data`.london_bicycles.cycle_stations s,
+    `bigquery-public-data`.london_bicycles.cycle_stations e
+  WHERE 
+    start_station_id = s.id
+    AND end_station_id = e.id
+)
+
+SELECT 
+  bike_id
+  , SUM(distance)/1000 AS total_distance
+FROM trip_distance
+GROUP BY bike_id
+ORDER BY total_distance DESC
+LIMIT 5
+WITH stations AS (
+  SELECT
+    s.id AS start_id
+    , e.id AS end_id
+    , ST_Distance(ST_GeogPoint(s.longitude, s.latitude),
+                  ST_GeogPoint(e.longitude, e.latitude)) AS distance
+  FROM
+    `bigquery-public-data`.london_bicycles.cycle_stations s,
+    `bigquery-public-data`.london_bicycles.cycle_stations e
+),
+
+trip_distance AS (
+  SELECT
+    bike_id
+    , distance
+  FROM
+    `bigquery-public-data`.london_bicycles.cycle_hire,
+    stations
+  WHERE 
+    start_station_id = start_id
+    AND end_station_id = end_id
+)
+
+SELECT 
+  bike_id
+  , SUM(distance)/1000 AS total_distance
+FROM trip_distance
+GROUP BY bike_id
+ORDER BY total_distance DESC
+LIMIT 5
+CURRENT_TIMESTAMPRANDWITH typical_trip AS (
+SELECT
+  start_station_name
+  , end_station_name
+  , APPROX_QUANTILES(duration, 10)[OFFSET(5)] AS typical_duration
+  , COUNT(duration) AS num_trips
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+GROUP BY
+  start_station_name, end_station_name
+)
+CREATE OR REPLACE TABLE ch07eu.typical_trip AS
+SELECT
+  start_station_name
+  , end_station_name
+  , APPROX_QUANTILES(duration, 10)[OFFSET(5)] AS typical_duration
+  , COUNT(duration) AS num_trips
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+GROUP BY
+  start_station_name, end_station_name
+SELECT 
+   EXTRACT (DATE FROM start_date) AS trip_date
+   , APPROX_QUANTILES(duration / typical_duration, 10)[OFFSET(5)] AS ratio
+   , COUNT(*) AS num_trips_on_day
+FROM 
+  `bigquery-public-data`.london_bicycles.cycle_hire AS hire
+JOIN typical_trip AS trip
+ON 
+   hire.start_station_name = trip.start_station_name 
+   AND hire.end_station_name = trip.end_station_name
+   AND num_trips > 10
+GROUP BY trip_date
+HAVING num_trips_on_day > 10
+ORDER BY ratio DESC
+LIMIT 10
+SELECT 
+   EXTRACT (DATE FROM start_date) AS trip_date
+   , APPROX_QUANTILES(duration / typical_duration, 10)[OFFSET(5)] AS ratio
+   , COUNT(*) AS num_trips_on_day
+FROM 
+  `bigquery-public-data`.london_bicycles.cycle_hire AS hire
+JOIN ch07eu.typical_trip AS trip
+ON 
+   hire.start_station_name = trip.start_station_name 
+   AND hire.end_station_name = trip.end_station_name
+   AND num_trips > 10
+GROUP BY trip_date
+HAVING num_trips_on_day > 10
+ORDER BY ratio DESC
+LIMIT 10
+ch07eu.typical_tripcycle_hireWITH trip AS (
+SELECT
+  REGEXP_REPLACE(start_station_name, 
+       r"^# ([a-zA-Z0-9\s]+$)", "FROM: \\1") AS start_station_name
+  , REGEXP_REPLACE(end_station_name, 
+       r"^# ([a-zA-Z0-9\s]+$)", "TO: \\1") ASend_station_name
+  , duration
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+)
+SELECT * FROM trip
+WHERE duration > 84000
+tripCREATE OR REPLACE TABLE ch07eu.london_bicycles_denorm AS
+SELECT
+  start_station_id
+  , s.latitude AS start_latitude
+  , s.longitude AS start_longitude
+  , end_station_id
+  , e.latitude AS end_latitude
+  , e.longitude AS end_longitude  
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire as h
+JOIN
+  `bigquery-public-data`.london_bicycles.cycle_stations as s
+ON
+  h.start_station_id = s.id
+JOIN
+  `bigquery-public-data`.london_bicycles.cycle_stations as e
+ON
+  h.end_station_id = e.id
+ 
+SELECT 
+  name
+  , number AS num_babies
+FROM `bigquery-public-data`.usa_names.usa_1910_current
+WHERE gender = 'M' AND year = 2015 AND state = 'MA'
+ORDER BY num_babies DESC
+LIMIT 5
+WITH male_babies AS (
+SELECT 
+  name
+  , number AS num_babies
+FROM `bigquery-public-data`.usa_names.usa_1910_current
+WHERE gender = 'M'
+),
+female_babies AS (
+SELECT 
+  name
+  , number AS num_babies
+FROM `bigquery-public-data`.usa_names.usa_1910_current
+WHERE gender = 'F'
+),
+both_genders AS (
+SELECT 
+  name
+  , SUM(m.num_babies) + SUM(f.num_babies) AS num_babies
+  , SUM(m.num_babies) / (SUM(m.num_babies) + SUM(f.num_babies)) AS frac_male
+FROM male_babies AS m
+JOIN female_babies AS f
+USING (name)
+GROUP BY name
+)
+
+SELECT * FROM both_genders
+WHERE frac_male BETWEEN 0.3 and 0.7
+ORDER BY num_babies DESC
+LIMIT 5
+WITH all_babies AS (
+SELECT 
+ name 
+ , SUM(IF(gender = 'M', number, 0)) AS male_babies
+ , SUM(IF(gender = 'F', number, 0)) AS female_babies
+FROM `bigquery-public-data.usa_names.usa_1910_current`
+GROUP BY name
+),
+
+both_genders AS (
+SELECT
+  name
+  , (male_babies + female_babies) AS num_babies
+  , SAFE_DIVIDE(male_babies, male_babies + female_babies) AS frac_male
+FROM all_babies
+WHERE male_babies > 0 AND female_babies > 0
+)
+
+SELECT * FROM both_genders
+WHERE frac_male BETWEEN 0.3 and 0.7
+ORDER BY num_babies desc
+limit 5
+with all_names AS (
+  SELECT name, gender, SUM(number) AS num_babies
+  FROM `bigquery-public-data`.usa_names.usa_1910_current
+  GROUP BY name, gender
+),
+
+male_names AS (
+   SELECT name, num_babies
+   FROM all_names
+   WHERE gender = 'M'
+),
+
+female_names AS (
+   SELECT name, num_babies
+   FROM all_names
+   WHERE gender = 'F'
+),
+
+ratio AS (
+  SELECT 
+    name
+    , (f.num_babies + m.num_babies) AS num_babies
+    , m.num_babies / (f.num_babies + m.num_babies) AS frac_male
+  FROM male_names AS m
+  JOIN female_names AS f
+  USING (name)
+)
+
+SELECT * from ratio
+WHERE frac_male BETWEEN 0.3 and 0.7
+ORDER BY num_babies DESC
+LIMIT 5
+end_datestart_dateSELECT
+  bike_id
+  , start_date
+  , end_date
+  , TIMESTAMP_DIFF(
+       start_date, 
+       LAG(end_date) OVER (PARTITION BY bike_id ORDER BY start_date),
+       SECOND) AS time_at_station
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+LIMIT 5
+time_at_stationtime_at_stationWITH unused AS (
+SELECT
+  bike_id
+  , start_station_name
+  , start_date
+  , end_date
+  , TIMESTAMP_DIFF(start_date, LAG(end_date) OVER (PARTITION BY bike_id ORDER BY start_date), SECOND) AS time_at_station
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+)
+
+SELECT
+  start_station_name
+  , AVG(time_at_station) AS unused_seconds
+FROM unused
+GROUP BY start_station_name
+ORDER BY unused_seconds ASC
+LIMIT 5
+with denormalized_table AS (
+  SELECT
+    start_station_name
+    , end_station_name
+    , ST_DISTANCE(ST_GeogPoint(s1.longitude, s1.latitude),
+                  ST_GeogPoint(s2.longitude, s2.latitude)) AS distance
+    , duration
+  FROM
+     `bigquery-public-data`.london_bicycles.cycle_hire AS h
+  JOIN
+    `bigquery-public-data`.london_bicycles.cycle_stations AS s1
+  ON h.start_station_id = s1.id
+  JOIN
+    `bigquery-public-data`.london_bicycles.cycle_stations AS s2
+  ON h.end_station_id = s2.id
+),
+
+durations AS (
+  SELECT
+    start_station_name
+    , end_station_name
+    , MIN(distance) AS distance
+    , AVG(duration) AS duration
+    , COUNT(*) AS num_rides
+  FROM
+    denormalized_table
+  WHERE
+    duration > 0 AND distance > 0
+  GROUP BY start_station_name, end_station_name
+  HAVING num_rides > 100
+)
+
+SELECT
+    start_station_name
+    , end_station_name
+    , distance
+    , duration
+    , duration/distance AS pace
+FROM durations
+ORDER BY pace ASC
+LIMIT 5
+ST_DISTANCEcycle_hirecycle_stationswith distances AS (
+  SELECT 
+    a.id AS start_station_id
+    , a.name AS start_station_name
+    , b.id AS end_station_id
+    , b.name AS end_station_name
+    , ST_DISTANCE(ST_GeogPoint(a.longitude, a.latitude),
+                ST_GeogPoint(b.longitude, b.latitude)) AS distance
+  FROM
+    `bigquery-public-data`.london_bicycles.cycle_stations a
+  CROSS JOIN
+    `bigquery-public-data`.london_bicycles.cycle_stations b
+  WHERE a.id != b.id
+),
+
+durations AS (
+  SELECT
+    start_station_id
+    , end_station_id
+    , AVG(duration) AS duration
+    , COUNT(*) AS num_rides
+  FROM
+    `bigquery-public-data`.london_bicycles.cycle_hire
+  WHERE
+    duration > 0
+  GROUP BY start_station_id, end_station_id
+  HAVING num_rides > 100
+)
+
+SELECT
+    start_station_name
+    , end_station_name
+    , distance
+    , duration
+    , duration/distance AS pace
+FROM distances
+JOIN durations
+USING (start_station_id, end_station_id)
+ORDER BY pace ASC
+LIMIT 5
+  CREATE OR REPLACE TABLE ch07eu.cycle_hire AS
+  SELECT
+    start_station_name
+    , end_station_name
+    , ST_DISTANCE(ST_GeogPoint(s1.longitude, s1.latitude),
+                  ST_GeogPoint(s2.longitude, s2.latitude)) AS distance
+    , duration
+  FROM
+     `bigquery-public-data`.london_bicycles.cycle_hire AS h
+  JOIN
+    `bigquery-public-data`.london_bicycles.cycle_stations AS s1
+  ON h.start_station_id = s1.id
+  JOIN
+    `bigquery-public-data`.london_bicycles.cycle_stations AS s2
+  ON h.end_station_id = s2.id
+SELECT 
+  rental_id
+  , ROW_NUMBER() OVER(ORDER BY end_date) AS rental_number
+FROM `bigquery-public-data.london_bicycles.cycle_hire`
+ORDER BY rental_number ASC
+LIMIT 5
+WITH rentals_on_day AS (
+SELECT 
+  rental_id
+  , end_date
+  , EXTRACT(DATE FROM end_date) AS rental_date
+FROM `bigquery-public-data.london_bicycles.cycle_hire`
+)
+
+SELECT 
+  rental_id
+  , rental_date
+  , ROW_NUMBER() OVER(PARTITION BY rental_date ORDER BY end_date) AS rental_number_on_day
+FROM rentals_on_day
+ORDER BY rental_date ASC, rental_number_on_day ASC
+LIMIT 5
+
+ARRAY_AGGGROUP BYSELECT 
+  repo_name
+  , ARRAY_AGG(STRUCT(author, committer, subject, message, trailer, difference, encoding) ORDER BY author.date.seconds)
+FROM `bigquery-public-data.github_repos.commits`, UNNEST(repo_name) AS repo_name
+GROUP BY repo_name
+SELECT 
+  author.tz_offset, ARRAY_AGG(STRUCT(author, committer, subject, message, trailer, difference, encoding) ORDER BY author.date.seconds)
+FROM `bigquery-public-data.github_repos.commits`
+GROUP BY author.tz_offset
+SELECT 
+  author.tz_offset, ARRAY_AGG(STRUCT(author, committer, subject, message, trailer, difference, encoding) ORDER BY author.date.seconds LIMIT 1000)
+FROM `bigquery-public-data.github_repos.commits`
+GROUP BY author.tz_offset
+SELECT 
+  repo_name, author.tz_offset
+  , ARRAY_AGG(STRUCT(author, committer, subject, message, trailer, difference, encoding) ORDER BY author.date.seconds)
+FROM `bigquery-public-data.github_repos.commits`, UNNEST(repo_name) AS repo_name
+GROUP BY repo_name, author.tz_offsetSELECT 
+  COUNT(DISTINCT repo_name) AS num_repos
+FROM `bigquery-public-data`.github_repos.commits, UNNEST(repo_name) AS repo_name
+SELECT 
+  APPROX_COUNT_DISTINCT(repo_name) AS num_repos
+FROM `bigquery-public-data`.github_repos.commits, UNNEST(repo_name) AS repo_name
+SELECT 
+  COUNT(DISTINCT bike_id) AS num_bikes
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+SELECT 
+  APPROX_COUNT_DISTINCT(bike_id) AS num_bikes
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+APPROX_QUANTILESAPPROX_TOP_COUNTAPPROX_TOP_SUMAPPROX_TOP_COUNTSELECT 
+  APPROX_TOP_COUNT(bike_id, 5) AS num_bikes
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+APPROX_TOP_COUNT LIMITAPPROX_TOP_SUMSELECT 
+  APPROX_TOP_SUM(start_station_name, duration, 5) AS num_bikes
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+WHERE duration > 0
+APPROX_*HLL_COUNT.INIT
+HLL_COUNT.EXTRACT
+HLL_COUNT.MERGE_PARTIAL
+HLL_COUNT.MERGEWITH sketch AS (
+SELECT
+   HLL_COUNT.INIT(start_station_name) AS hll_start
+  , HLL_COUNT.INIT(end_station_name) AS hll_end
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+)
+
+SELECT 
+  HLL_COUNT.MERGE(hll_start) AS distinct_start
+  , HLL_COUNT.MERGE(hll_end) AS distinct_end
+  , HLL_COUNT.MERGE(hll_both) AS distinct_station
+FROM sketch, UNNEST([hll_start, hll_end]) AS hll_both
+APPROX_COUNT_DISTINCTSELECT
+   APPROX_COUNT_DISTINCT(start_station_name) AS distinct_start
+  , APPROX_COUNT_DISTINCT(end_station_name) AS distinct_end
+  , APPROX_COUNT_DISTINCT(both_stations) AS distinct_station
+FROM 
+  `bigquery-public-data`.london_bicycles.cycle_hire
+  , UNNEST([start_station_name, end_station_name]) AS both_stations
+APPROX_user_id, date, product, country
+user_idHLL_COUNT.INITINSERT INTO approx_distinct_users_agg AS 
+SELECT date, product, country, HLL_COUNT.INIT(user_id) AS sketch
+GROUP BY date, product, country, sketch
+SELECT date, HLL_COUNT.MERGE(sketch)
+FROM approx_distinct_users_agg 
+GROUP BY dateAccept-Encoding: gzip
+User-Agent: programName (gzip)
+JOBSURL="https://www.googleapis.com/bigquery/v2/projects/$PROJECT/jobs"
+FIELDS="statistics(query(queryPlan(steps)))"
+curl --silent \
+    -H "Authorization: Bearer $access_token"  \
+    -H "Accept-Encoding: gzip"  \
+    -H "User-Agent: get_job_details (gzip)"  \
+    -X GET \
+    "${JOBSURL}/${JOBID}?fields=${FIELDS}" \
+  | zcat
+multipart/mixedmultipart/mixed# The 5 most recent successful jobs
+JOBS=$(bq ls -j -n 50 | grep SUCCESS | head -5 | awk '{print $1}')
+
+BATCHURL="https://www.googleapis.com/batch/bigquery/v2"
+JOBSPATH="/projects/$PROJECT/jobs"
+FIELDS="statistics(query(queryPlan(steps)))"
+
+request=""
+for JOBID in $JOBS; do
+read -d '' part << EOF
+
+--batch_part_starts_here
+GET ${JOBSPATH}/${JOBID}?fields=${FIELDS}
+
+EOF
+request=$(echo "$request"; echo "$part")
+done
+
+curl --silent \
+    -H "Authorization: Bearer $access_token"  \
+    -H "Content-Type: multipart/mixed; boundary=batch_part_starts_here" \
+    -X POST \
+    -d "$request" \
+    "${BATCHURL}" 
+%%bigquery%pip install google-cloud-bigquery-storage[fastavro,pandas]
+%%bigquery%%bigquery df --use_bqstorage_api --project $PROJECT
+SELECT 
+  start_station_name 
+  , end_station_name
+  , start_date
+  , duration
+FROM `bigquery-public-data`.london_bicycles.cycle_hire 
+--use_bqstorage_apiimport google.cloud.bigquery.magics
+google.cloud.bigquery.magics.context.use_bqstorage_api = Truegsutil lifecycle set lifecycle.yaml gs://some_bucket/
+{
+"lifecycle": {
+  "rule": [
+  {
+    "action": {
+      "type": "SetStorageClass",
+      "storageClass": "NEARLINE"
+    },
+    "condition": {
+      "age": 30,
+      "matchesStorageClass": ["MULTI_REGIONAL", "STANDARD"]
+    }
+  },
+  {
+    "action": {
+      "type": "SetStorageClass",
+      "storageClass": "COLDLINE"
+    },
+    "condition": {
+      "age": 90,
+      "matchesStorageClass": ["NEARLINE"]
+    }
+  }
+]}}
+SELECT
+  sid, number, basin, name,
+  ARRAY_AGG(STRUCT(iso_time, usa_latitude, usa_longitude, usa_wind) ORDER BY usa_wind DESC LIMIT 1)[OFFSET(0)].*
+FROM
+  `bigquery-public-data`.noaa_hurricanes.hurricanes
+WHERE
+  season = '2018'
+GROUP BY
+  sid, number, basin, name
+ORDER BY number ASC
+CREATE OR REPLACE TABLE ch07.hurricanes_nested AS
+
+SELECT sid, season, number, basin, name, iso_time, nature, usa_sshs,
+       STRUCT(usa_latitude AS latitude, usa_longitude AS longitude, usa_wind AS wind, usa_pressure AS pressure) AS usa,
+       STRUCT(tokyo_latitude AS latitude, tokyo_longitude AS longitude, tokyo_wind AS wind, tokyo_pressure AS pressure) AS tokyo,
+       ... AS cma,
+       ... AS hko,
+       ... AS newdelhi,
+       ... AS reunion,
+       ... bom,
+       ... AS wellington,
+       ... nadi
+FROM `bigquery-public-data`.noaa_hurricanes.hurricanes
+usa.latitudeusa_latitudeSELECT
+  sid, number, basin, name,
+  ARRAY_AGG(STRUCT(iso_time, usa.latitude, usa.longitude, usa.wind) ORDER BY usa.wind DESC LIMIT 1)[OFFSET(0)].*
+FROM
+  ch07.hurricanes_nested
+WHERE
+  season = '2018'
+GROUP BY
+  sid, number, basin, name
+ORDER BY number ASC
+CREATE OR REPLACE TABLE ch07.hurricanes_nested_track AS
+
+SELECT sid, season, number, basin, name,
+ ARRAY_AGG(
+   STRUCT(
+       iso_time,
+       nature,
+       usa_sshs,
+       STRUCT(usa_latitude AS latitude, usa_longitude AS longitude, usa_wind AS wind, usa_pressure AS pressure) AS usa,
+       STRUCT(tokyo_latitude AS latitude, tokyo_longitude AS longitude, tokyo_wind AS wind, tokyo_pressure AS pressure) AS tokyo,
+       ... AS cma,
+       ... AS hko,
+       ... AS newdelhi,
+       ... AS reunion,
+       ... bom,
+       ... AS wellington,
+       ... nadi
+   ) ORDER BY iso_time ASC ) AS obs
+FROM `bigquery-public-data`.noaa_hurricanes.hurricanes
+GROUP BY sid, season, number, basin, name
+sidseasonSELECT
+  number, name, basin, 
+  (SELECT AS STRUCT iso_time, usa.latitude, usa.longitude, usa.wind 
+          FROM UNNEST(obs) ORDER BY usa.wind DESC LIMIT 1).*
+FROM ch07.hurricanes_nested_track
+WHERE season = '2018'
+ORDER BY number ASC
+WITH hurricane_detail AS (
+
+SELECT sid, season, number, basin, name,
+ ARRAY_AGG(
+   STRUCT(
+       iso_time,
+       nature,
+       usa_sshs,
+       STRUCT(usa_latitude AS latitude, usa_longitude AS longitude, usa_wind AS wind, usa_pressure AS pressure) AS usa,
+       STRUCT(tokyo_latitude AS latitude, tokyo_longitude AS longitude, tokyo_wind AS wind, tokyo_pressure AS pressure) AS tokyo
+   ) ORDER BY iso_time ASC ) AS obs
+FROM `bigquery-public-data`.noaa_hurricanes.hurricanes
+GROUP BY sid, season, number, basin, name
+)
+
+SELECT 
+  COUNT(sid) AS count_of_storms,
+  season
+FROM hurricane_detail
+GROUP BY season 
+ORDER BY season DESC
+
+seasonbigquery-public-data.github_repos.commitsrepo_namerepo_nameSELECT DISTINCT
+ visitId
+ , totals.pageviews
+ , totals.timeOnsite
+ , trafficSource.source
+ , device.browser
+ , device.isMobile
+ , h.page.pageTitle
+FROM 
+  `bigquery-public-data`.google_analytics_sample.ga_sessions_20170801,
+  UNNEST(hits) AS h
+WHERE
+  totals.timeOnSite IS NOT NULL AND h.page.pageTitle = 'Shopping Cart'
+ORDER BY pageviews DESC
+LIMIT 10
+[1,2,3,4,5]
+[1,
+2
+3
+4
+5]
+bigquery-public-data.utility_us.zipcode_areabigquery-public-data.utility_us.us_cities_areazipcode_geomcity_geomSELECT name, zipcode 
+FROM `bigquery-public-data`.utility_us.zipcode_area
+JOIN `bigquery-public-data`.utility_us.us_cities_area
+ON ST_INTERSECTS(ST_GeogFromText(zipcode_geom), city_geom)
+WHERE name LIKE '%Santa Fe%'
+ST_INTERSECTSST_GeogFromTextCREATE OR REPLACE TABLE ch07.zipcode_area AS
+SELECT 
+  * REPLACE(ST_GeogFromText(zipcode_geom) AS zipcode_geom)
+FROM
+  `bigquery-public-data`.utility_us.zipcode_area
+SELECT * REPLACESELECT *SELECT name, zipcode 
+FROM ch07.zipcode_area
+JOIN `bigquery-public-data`.utility_us.us_cities_area
+ON ST_INTERSECTS(zipcode_geom, city_geom)
+WHERE name LIKE '%Santa Fe%'
+utility_usbigquery-public-data.geo_us_boundaries.us_zip_codesSELECT 
+  start_station_name 
+  , AVG(duration) AS avg_duration
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+WHERE EXTRACT(YEAR from start_date) = 2015 
+GROUP BY start_station_name
+ORDER BY avg_duration DESC
+LIMIT 5 
+cycle_hire_2015CREATE OR REPLACE TABLE ch07eu.cycle_hire_2015 AS (
+  SELECT * FROM  `bigquery-public-data`.london_bicycles.cycle_hire
+  WHERE EXTRACT(YEAR from start_date) = 2015
+)
+SELECT 
+  start_station_name 
+  , AVG(duration) AS avg_duration
+FROM ch07eu.cycle_hire_2015
+GROUP BY start_station_name
+ORDER BY avg_duration DESC
+LIMIT 5
+SELECT 
+  start_station_name 
+  , AVG(duration) AS avg_duration
+FROM `ch07eu.cycle_hire_*`
+WHERE _TABLE_SUFFIX BETWEEN '2015' AND '2016'
+GROUP BY start_station_name
+ORDER BY avg_duration DESC
+LIMIT 5
+CREATE OR REPLACE TABLE ch07eu.cycle_hire_partitioned
+   PARTITION BY DATE(start_date) AS
+SELECT * FROM `bigquery-public-data`.london_bicycles.cycle_hire
+CREATE OR REPLACE TABLE ch07eu.cycle_hire_partitioned
+   PARTITION BY DATE(start_date) 
+   OPTIONS(partition_expiration_days=1000,    
+           require_partition_filter=true) AS
+SELECT * FROM `bigquery-public-data`.london_bicycles.cycle_hire
+ALTER TABLE ch07eu.cycle_hire_partitioned
+SET OPTIONS(require_partition_filter=true)
+start_dateSELECT 
+  start_station_name 
+  , AVG(duration) AS avg_duration
+FROM ch07eu.cycle_hire_partitioned
+WHERE start_date BETWEEN '2015-01-01' AND '2015-12-31'
+GROUP BY start_station_name
+ORDER BY avg_duration DESC
+LIMIT 5SELECT 
+  start_station_name 
+  , AVG(duration) AS avg_duration
+FROM ch07eu.cycle_hire_partitioned
+WHERE EXTRACT(YEAR FROM start_date) = 2015
+GROUP BY start_station_name
+ORDER BY avg_duration DESC
+LIMIT 5_PARTITIONTIME_PARTITIONDATE__UNPARTITIONED____UNPARTITIONED__NULL_PARTITIONTIMEcustomerIdstart_station_nameend_station_nameCREATE OR REPLACE TABLE ch07eu.cycle_hire_clustered
+   PARTITION BY DATE(start_date) 
+   CLUSTER BY start_station_name, end_station_name   
+AS ( 
+ SELECT * FROM `bigquery-public-data`.london_bicycles.cycle_hire
+)
+SELECT 
+  start_station_name
+  , end_station_name
+  , AVG(duration) AS duration
+FROM ch07eu.cycle_hire_clustered
+WHERE 
+  start_station_name LIKE '%Kennington%'
+  AND end_station_name LIKE '%Hyde%'    
+GROUP BY start_station_name, end_station_name
+CLUSTER BY wiki, title
+wikititleSELECT title, SUM(views) AS views
+FROM `fh-bigquery.wikipedia_v3.pageviews_2017` 
+WHERE DATE(datehour) BETWEEN '2017-06-01' AND '2017-06-30'
+AND wiki = 'en'
+AND title LIKE '%Liberia%'
+GROUP BY title
+event_timeclustering_ratioMERGEMERGE ch07eu.cycle_hire_clustered all_hires
+USING ch07eu.cycle_hire_corrections some_month
+ON all_hires.start_station_name = some_month.start_station_name
+WHEN MATCHED 
+  AND all_hires._PARTITIONTIME = DATE(some_month.start_date) THEN
+  INSERT (rental_id, duration, ...)
+  VALUES (rental_id, duration, ...)
+UPDATEUPDATE ch07eu.cycle_hire_clustered 
+SET start_station_id = 300
+WHERE start_station_id = 300
+AND start_date > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY)SELECT * ... LIMIT 10SELECT * ... LIMIT 10zip_codestatezip_codezip_codestatezip_code0000099999stateorderscustomer_idcustomersSELECT o.*
+FROM orders o 
+JOIN customers c USING (customer_id)
+WHERE c.name = "Changying Bao"
+orderscustomer_id// First look up the customer id.
+// This scans only the small dimension table
+SET id = SELECT customer_id FROM customers
+WHERE c.name = "Changying Bao" 
+// Next look up the customer from the orders table.
+// This will filter by the cluster column,
+// and so only needs to read a small amount of data.
+SELECT * FROM orders WHERE customer_id=$id ;
+--batch flagBATCHINTERACTIVEBigQueryIOBigQueryIO.writeTableRows()
+                .to("project-id:dataset-id.table-id")
+                .withCreateDisposition(
+                   BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED)
+                .withMethod(Method.FILE_LOADS)
+                .withTriggeringFrequency(Duration.standardSeconds(600))
+                .withNumFileShards(10)
+                .withSchema(new TableSchema()...)
+                .withoutValidation())
+dry_run

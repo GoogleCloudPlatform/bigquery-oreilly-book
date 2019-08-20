@@ -1,0 +1,794 @@
+kmeans
+linear_reg
+dnn_regressor
+boosted_tree_regressor
+matrix_factorization
+matrix_factorization
+logistic_reg
+dnn_classifier
+boosted_tree_classifier
+logistic_reg
+dnn_classifier
+boosted_tree_classifier
+SELECT 
+  start_station_name
+  , AVG(duration) AS duration
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+GROUP BY start_station_name
+start_station_namedurationstart_station_nameend_station_namedayofweekhourofdaySELECT 
+  EXTRACT(dayofweek FROM start_date) AS dayofweek
+  , AVG(duration) AS duration
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+GROUP BY dayofweek
+dayofweekhourofdaySELECT 
+  bikes_count
+  , AVG(duration) AS duration
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+JOIN `bigquery-public-data`.london_bicycles.cycle_stations
+ON cycle_hire.start_station_name = cycle_stations.name
+GROUP BY bikes_count
+SELECT 
+  CORR(bikes_count, duration) AS corr
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+JOIN `bigquery-public-data`.london_bicycles.cycle_stations
+ON cycle_hire.start_station_name = cycle_stations.name
+bikes_countdurationSELECT 
+  duration
+  , start_station_name
+  , CAST(EXTRACT(dayofweek FROM start_date) AS STRING) as dayofweek
+  , CAST(EXTRACT(hour FROM start_date) AS STRING) AS hourofday
+FROM `bigquery-public-data`.london_bicycles.cycle_hireINT64FLOAT64STRINGdayofweekhourofdaych09euCREATE OR REPLACE MODEL ch09eu.bicycle_model
+OPTIONS(input_label_cols=['duration'], model_type='linear_reg')
+AS
+
+SELECT 
+  duration
+  , start_station_name
+  , CAST(EXTRACT(dayofweek FROM start_date) AS STRING) as dayofweek
+  , CAST(EXTRACT(hour FROM start_date) AS STRING) AS hourofday
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+OPTIONSlinear_regSELECTSELECT * FROM ML.EVALUATE(MODEL ch09eu.bicycle_model)
+OPTIONSdayofweekdayofweekdayofweekweekdayCREATE OR REPLACE MODEL ch09eu.bicycle_model_weekday
+OPTIONS(input_label_cols=['duration'], model_type='linear_reg')
+AS
+
+SELECT 
+  duration
+  , start_station_name
+  , IF(EXTRACT(dayofweek FROM start_date) BETWEEN 2 and 6, 
+       'weekday', 'weekend') as dayofweek
+  , CAST(EXTRACT(hour FROM start_date) AS STRING) AS hourofday
+FROM `bigquery-public-data`.london_bicycles.cycle_hirehourofdayCREATE OR REPLACE MODEL ch09eu.bicycle_model_bucketized
+OPTIONS(input_label_cols=['duration'], model_type='linear_reg')
+AS
+
+SELECT 
+  duration
+  , start_station_name
+  , IF(EXTRACT(dayofweek FROM start_date) BETWEEN 2 and 6, 'weekday', 'weekend') as dayofweek
+  , ML.BUCKETIZE(EXTRACT(hour FROM start_date), [5, 10, 17]) AS hourofday
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+ML.BUCKETIZE-- INCORRECT! (see next section)
+SELECT * FROM ML.PREDICT(MODEL ch09eu.bicycle_model_bucketized, 
+  (SELECT 'Park Lane , Hyde Park' AS start_station_name
+          , 'weekday' AS dayofweek, '17' AS hourofday) 
+)
+TRANSFORM
+'weekday''3'dayofweekdayofweekweekdayweekend'17'  hourofdayTRANSFORMTRANSFORMCREATE OR REPLACE MODEL ch09eu.bicycle_model_bucketized
+TRANSFORM(* EXCEPT(start_date)
+          , IF(EXTRACT(dayofweek FROM start_date) BETWEEN 2 and 6, 'weekday', 'weekend') as dayofweek
+          , ML.BUCKETIZE(EXTRACT(HOUR FROM start_date), [5, 10, 17]) AS hourofday
+)
+OPTIONS(input_label_cols=['duration'], model_type='linear_reg')
+AS
+
+SELECT 
+  duration
+  , start_station_name
+  , start_date
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+TRANSFORMTRANSFORMTRANSFORMTRANSFORMSELECTstart_datedayofweekhourofdaystart_station_namestart_datedurationTRANSFORMSELECTTRANSFORMTRANSFORMSELECT * FROM ML.PREDICT(MODEL ch09eu.bicycle_model_bucketized, 
+  (SELECT 'Park Lane , Hyde Park' AS start_station_name
+          , CURRENT_TIMESTAMP() AS start_date) 
+)
+timeofdaydayofweek
+DECLARE tomorrow_3am TIMESTAMP;
+SET tomorrow_3am = TIMESTAMP_ADD(
+  TIMESTAMP(DATE_ADD(CURRENT_DATE(), INTERVAL 1 DAY)),
+  INTERVAL 3 HOUR);
+
+WITH generated AS (
+  SELECT
+    name AS start_station_name
+    , GENERATE_TIMESTAMP_ARRAY( 
+        tomorrow_3am,
+        TIMESTAMP_ADD(tomorrow_3am, INTERVAL 24 HOUR),
+        INTERVAL 1 HOUR) AS dates
+  FROM 
+    `bigquery-public-data`.london_bicycles.cycle_stations
+),
+
+features AS (
+  SELECT 
+    start_station_name
+    , start_date
+  FROM 
+    generated
+    , UNNEST(dates) AS start_date
+)
+
+SELECT * FROM ML.PREDICT(MODEL ch09eu.bicycle_model_bucketized,
+  (SELECT * FROM features)
+)
+ SELECT * FROM ML.WEIGHTS(MODEL ch09eu.bicycle_model_bucketized)
+dayofweekdef compute_regression(rowdict, 
+        numeric_weights, scaling_df, categorical_weights):
+  input_values = rowdict
+  # numeric inputs
+  pred = 0
+  for column_name in numeric_weights['input'].unique():
+    wt = numeric_weights[ numeric_weights['input'] == column_name ]['input_weight'].values[0]
+    if column_name != '__INTERCEPT__':
+      meanv = scaling_df[ scaling_df['input'] == column_name ]['mean'].values[0]
+      stddev = scaling_df[ scaling_df['input'] == column_name ]['stddev'].values[0]
+      scaled_value = (input_values[column_name] - meanv)/stddev
+    else:
+      scaled_value = 1.0
+    contrib = wt * scaled_value
+    pred = pred + contrib
+  # categorical inputs
+  for column_name in categorical_weights['input'].unique():
+    category_weights = categorical_weights[ categorical_weights['input'] == column_name ]
+    wt = category_weights[ category_weights['category_name'] == input_values[column_name] ]['category_weight'].values[0]
+    pred = pred + wt
+  return pred
+numeric_weightsSELECT
+  processed_input AS input,
+  model.weight AS input_weight
+FROM
+  ml.WEIGHTS(MODEL dataset.model) AS model
+scaling_dfSELECT
+  input, min, max, mean, stddev
+FROM
+  ml.FEATURE_INFO(MODEL dataset.model) AS model
+categorical_weightsSELECT
+  processed_input AS input,
+  model.weight AS input_weight,
+  category.category AS category_name,
+  category.weight AS category_weight
+FROM
+  ml.WEIGHTS(MODEL dataset.model) AS model,
+  UNNEST(category_weights) AS category
+logistic_regdef compute_classifier(rowdict, 
+  numeric_weights, scaling_df, categorical_weights):
+    pred=compute_regression(rowdict, numeric_weights, scaling_df, categorical_weights)
+    return (1.0/(1 + np.exp(-pred)) if (-500 < pred) else 0)
+dnn_regressorxgboostCREATE OR REPLACE MODEL ch09eu.bicycle_model_dnn
+TRANSFORM(* EXCEPT(start_date)
+          , IF(EXTRACT(dayofweek FROM start_date) BETWEEN 2 and 6, 'weekday', 'weekend') as dayofweek
+          , ML.BUCKETIZE(EXTRACT(HOUR FROM start_date), [5, 10, 17]) AS hourofday
+)
+OPTIONS(input_label_cols=['duration'], 
+        model_type='dnn_regressor',
+        hidden_units=[64, 32])
+AS
+
+SELECT 
+  duration
+  , start_station_name
+  , start_date
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+dnn_regressorhidden_unitsl2_regCREATE OR REPLACE MODEL ch09eu.bicycle_model_dnn
+TRANSFORM(* EXCEPT(start_date)
+          , IF(EXTRACT(dayofweek FROM start_date) BETWEEN 2 and 6, 'weekday', 'weekend') as dayofweek
+          , ML.BUCKETIZE(EXTRACT(HOUR FROM start_date), [5, 10, 17]) AS hourofday
+)
+OPTIONS(input_label_cols=['duration'], 
+        model_type='dnn_regressor',
+        hidden_units=[10, 5])
+AS
+
+SELECT 
+  duration
+  , start_station_name
+  , start_date
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+
+boosted_tree_regressorCREATE OR REPLACE MODEL ch09eu.bicycle_model_xgboost
+TRANSFORM(* EXCEPT(start_date)
+          , IF(EXTRACT(dayofweek FROM start_date) BETWEEN 2 and 6, 'weekday', 'weekend') as dayofweek
+          , ML.BUCKETIZE(EXTRACT(HOUR FROM start_date), [5, 10, 17]) AS hourofday
+)
+OPTIONS(input_label_cols=['duration'], 
+        model_type='boosted_tree_regressor',
+        max_tree_depth=4)
+AS
+
+SELECT 
+  duration
+  , start_station_name
+  , start_date
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+
+SELECT * FROM ML.FEATURE_INFO(MODEL ch09eu.bicycle_model_xgboost)ML.BUCKETIZEML.FEATURE_CROSS   ML.FEATURE_CROSS(STRUCT(
+      IF(EXTRACT(dayofweek FROM start_date) BETWEEN 2 and 6, 
+         'weekday', 'weekend') as dayofweek, 
+      ML.BUCKETIZE(EXTRACT(HOUR FROM start_date), 
+         [5, 10, 17]) AS hr
+   )) AS dayhr
+
+start_station_nameST_GeoHashCREATE OR REPLACE MODEL ch09eu.bicycle_model_fc_geo
+TRANSFORM(duration
+          , ML.FEATURE_CROSS(STRUCT(
+              IF(EXTRACT(dayofweek FROM start_date) BETWEEN 2 and 6, 
+                 'weekday', 'weekend') as dayofweek, 
+              ML.BUCKETIZE(EXTRACT(HOUR FROM start_date), 
+                 [5, 10, 17]) AS hr
+            )) AS dayhr
+          , ST_GeoHash(ST_GeogPoint(latitude, longitude), 4) AS start_station_loc4
+          , ST_GeoHash(ST_GeogPoint(latitude, longitude), 6) AS start_station_loc6
+          , ST_GeoHash(ST_GeogPoint(latitude, longitude), 8) AS start_station_loc8
+)
+OPTIONS(input_label_cols=['duration'], model_type='linear_reg')
+AS
+
+SELECT 
+  duration
+  , latitude
+  , longitude
+  , start_date
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+JOIN `bigquery-public-data`.london_bicycles.cycle_stations
+ON cycle_hire.start_station_id = cycle_stations.id
+SELECT 
+  APPROX_QUANTILES(duration, 10) AS q
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+WHERE 
+  EXTRACT(dayofweek FROM start_date) BETWEEN 2 and 6
+  AND EXTRACT(hour FROM start_date) = 14
+  AND start_station_name = 'Royal Avenue 1, Chelsea'
+CREATE OR REPLACE MODEL ch09eu.bicycle_model_longrental
+TRANSFORM(* EXCEPT(start_date)
+          , IF(EXTRACT(dayofweek FROM start_date) BETWEEN 2 and 6, 'weekday', 'weekend') as dayofweek
+          , ML.BUCKETIZE(EXTRACT(HOUR FROM start_date), [5, 10, 17]) AS hourofday
+)
+OPTIONS(input_label_cols=['biketype'], model_type='logistic_reg')
+AS
+
+SELECT 
+  IF(duration > 1800, 'roadbike', 'commuter') AS biketype
+  , start_station_name
+  , start_date
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+model_typelogistic_regdnn_classifierboosted_tree_classifier roadbikecommuterweekendweekdaydayofweekSELECT * FROM ML.PREDICT(MODEL ch09eu.bicycle_model_longrental, 
+  (SELECT 'Park Lane , Hyde Park' AS start_station_name
+          , TIMESTAMP('2019-05-09 16:16:00 UTC') AS start_date) 
+)
+accuracyML.PREDICTSELECT * FROM ML.PREDICT(MODEL ch09eu.bicycle_model_longrental, 
+  (SELECT 'Park Lane , Hyde Park' AS start_station_name
+          , TIMESTAMP('2019-05-09 16:16:00 UTC') AS start_date),
+  STRUCT(0.144 AS threshold)
+)
+predicted_biketyperoadbikeroadbikedata_split_methoddata_split_eval_fractiondata_split_coldata_split_methoddata_split_eval_fractiondata_split_colauto_split
+no_split
+random
+custom
+seq
+CREATE OR REPLACE MODEL ch09eu.bicycle_model_bucketized_seq
+TRANSFORM(* EXCEPT(start_date)
+          , IF(EXTRACT(dayofweek FROM start_date) BETWEEN 2 and 6, 'weekday', 'weekend') as dayofweek
+          , ML.BUCKETIZE(EXTRACT(HOUR FROM start_date), [5, 10, 17]) AS hourofday
+          , start_date -- used to split the data
+)
+OPTIONS(input_label_cols=['duration'], model_type='linear_reg',
+        data_split_method='seq', 
+        data_split_eval_fraction=0.2, 
+        data_split_col='start_date')
+AS
+
+SELECT 
+  duration
+  , start_station_name
+  , start_date
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+SELECTTRANSFORMOPTIONSCREATE OR REPLACE MODEL ch09eu.bicycle_model_longrental_balanced
+TRANSFORM(* EXCEPT(start_date)
+          , IF(EXTRACT(dayofweek FROM start_date) BETWEEN 2 and 6, 'weekday', 'weekend') as dayofweek
+          , ML.BUCKETIZE(EXTRACT(HOUR FROM start_date), [5, 10, 17]) AS hourofday
+          , start_date
+)
+OPTIONS(input_label_cols=['biketype'], model_type='logistic_reg',
+        data_split_method='seq', 
+        data_split_eval_fraction=0.2, 
+        data_split_col='start_date',
+        auto_class_weights=True)
+
+AS
+
+SELECT 
+  IF(duration > 1800, 'roadbike', 'commuter') AS biketype
+  , start_station_name
+  , start_date
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+CREATE OR REPLACE MODEL ch09eu.bicycle_model_bucketized_seq_l2
+TRANSFORM(* EXCEPT(start_date)
+          , IF(EXTRACT(dayofweek FROM start_date) BETWEEN 2 and 6, 'weekday', 'weekend') as dayofweek
+          , ML.BUCKETIZE(EXTRACT(HOUR FROM start_date), [5, 10, 17]) AS hourofday
+          , start_date -- used to split the data
+)
+OPTIONS(input_label_cols=['duration'], model_type='linear_reg',
+        data_split_method='seq', 
+        data_split_eval_fraction=0.2, 
+        data_split_col='start_date',
+        l2_reg=0.1)
+AS
+
+SELECT 
+  duration
+  , start_station_name
+  , start_date
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+model_type=kmeansmatrix_factorizationCREATE OR REPLACE TABLE ch09eu.stationstats AS
+
+WITH hires AS (
+  SELECT 
+    h.start_station_name as station_name,
+    IF(EXTRACT(DAYOFWEEK FROM h.start_date) BETWEEN 2 and 6,
+               "weekday", "weekend") as isweekday,
+    h.duration,
+    s.bikes_count,
+    ST_DISTANCE(ST_GEOGPOINT(s.longitude, s.latitude), 
+                ST_GEOGPOINT(-0.1, 51.5))/1000 as distance_from_city_center
+  FROM `bigquery-public-data.london_bicycles.cycle_hire` as h
+  JOIN `bigquery-public-data.london_bicycles.cycle_stations` as s
+  ON h.start_station_id = s.id
+  WHERE EXTRACT(YEAR from start_date) = 2015
+),
+
+stationstats AS (
+  SELECT 
+    station_name,
+    AVG(IF(isweekday = 'weekday', duration, NULL)) AS duration_weekdays,
+    AVG(IF(isweekday = 'weekend', duration, NULL)) AS duration_weekends,    
+    COUNT(IF(isweekday = 'weekday', duration, NULL)) AS numtrips_weekdays,
+    COUNT(IF(isweekday = 'weekend', duration, NULL)) AS numtrips_weekends,    
+    MAX(bikes_count) as bikes_count,
+    MAX(distance_from_city_center) as distance_from_city_center
+  FROM hires
+  GROUP BY station_name
+)
+
+SELECT * 
+from stationstats
+CREATE MODELstation_nameCREATE OR REPLACE MODEL ch09eu.london_station_clusters
+OPTIONS(model_type='kmeans', 
+        num_clusters=4, 
+        standardize_features = true) AS
+
+SELECT * EXCEPT(station_name)
+from ch09eu.stationstats
+model_typekmeansnum_clustersstandardize_featuresSELECT * except(nearest_centroids_distance) 
+FROM ML.PREDICT(MODEL ch09eu.london_station_clusters, 
+(SELECT * FROM ch09eu.stationstats 
+ WHERE REGEXP_CONTAINS(station_name, 'Kennington')))
+SELECT * 
+FROM ML.CENTROIDS(MODEL ch09eu.london_station_clusters)
+ORDER BY centroid_id
+CREATE TEMP FUNCTION cvalue(x ANY TYPE, col STRING) AS (
+  (SELECT value from unnest(x) WHERE name = col)
+);
+
+WITH T AS (
+  SELECT 
+  centroid_id,
+  ARRAY_AGG(STRUCT(feature AS name, ROUND(numerical_value,1) AS value) ORDER BY centroid_id) AS cluster
+  FROM ML.CENTROIDS(MODEL ch09eu.london_station_clusters)
+  GROUP BY centroid_id
+)
+SELECT
+  CONCAT('Cluster#', CAST(centroid_id AS STRING)) AS centroid,
+  cvalue(cluster, 'duration_weekdays') AS duration_weekdays,
+  cvalue(cluster, 'duration_weekends') AS duration_weekends,
+  cvalue(cluster, 'numtrips_weekdays') AS numtrips_weekdays,
+  cvalue(cluster, 'numtrips_weekends') AS numtrips_weekends,
+  cvalue(cluster, 'bikes_count') AS bikes_count,
+  cvalue(cluster, 'distance_from_city_center') AS distance_from_city_center
+FROM T
+ORDER BY centroid_id ASC
+
+curl -O 'http://files.grouplens.org/datasets/movielens/ml-20m.zip'
+unzip ml-20m.zip
+bq --location=EU load --source_format=CSV \
+     --autodetect ch09eu.movielens_ratings ml-20m/ratings.csv
+bq --location=EU load  --source_format=CSV \
+     --autodetect ch09eu.movielens_movies_raw ml-20m/movies.csv
+SELECT 
+ COUNT(DISTINCT userId) numUsers,
+ COUNT(DISTINCT movieId) numMovies,
+ COUNT(*) totalRatings
+FROM ch09eu.movielens_ratings
+SELECT *
+FROM ch09eu.movielens_movies_raw
+WHERE movieId < 5
+CREATE OR REPLACE TABLE ch09eu.movielens_movies AS
+SELECT 
+* REPLACE(SPLIT(genres, "|") AS genres)
+FROM
+ch09eu.movielens_movies_raw
+-- not the final model; see movie_recommender_16
+CREATE OR REPLACE MODEL ch09eu.movie_recommender
+options(model_type='matrix_factorization',
+        user_col='userId', item_col='movieId', rating_col='rating')
+AS
+
+SELECT 
+userId, movieId, rating
+FROM ch09eu.movielens_ratings
+model_typematrix_factorization-- not final model. See movie_recommender_16
+CREATE OR REPLACE MODEL ch09eu.movie_recommender_l2
+options(model_type='matrix_factorization',
+        user_col='userId', item_col='movieId', 
+        rating_col='rating', l2_reg=0.2)
+AS
+
+SELECT 
+userId, movieId, rating
+FROM ch09eu.movielens_ratings
+CREATE OR REPLACE MODEL ch09eu.movie_recommender_16
+options(model_type='matrix_factorization',
+        user_col='userId', item_col='movieId', 
+        rating_col='rating', l2_reg=0.2, num_factors=16)
+AS
+
+SELECT 
+userId, movieId, rating
+FROM ch09eu.movielens_ratings
+userIdSELECT * FROM
+ML.PREDICT(MODEL ch09eu.movie_recommender_16, (
+  SELECT 
+    movieId, title, 903 AS userId
+  FROM ch09eu.movielens_movies, UNNEST(genres) g
+  WHERE g = 'Comedy'
+))
+ORDER BY predicted_rating DESC
+LIMIT 5
+ML.PREDICTmovieIduserIduserIdComedySELECT * FROM
+ML.PREDICT(MODEL ch09eu.movie_recommender_16, (
+  WITH seen AS (
+    SELECT ARRAY_AGG(movieId) AS movies 
+    FROM ch09eu.movielens_ratings
+    WHERE userId = 903
+  )
+  SELECT 
+    movieId, title, 903 AS userId
+  FROM ch09eu.movielens_movies, UNNEST(genres) g, seen
+  WHERE g = 'Comedy' AND movieId NOT IN UNNEST(seen.movies)
+))
+ORDER BY predicted_rating DESC
+LIMIT 5
+SELECT * FROM
+ML.PREDICT(MODEL ch09eu.movie_recommender_16, (
+  WITH allUsers AS (
+     SELECT DISTINCT userId
+     FROM ch09eu.movielens_ratings
+  )
+  SELECT 
+    96481 AS movieId, 
+    (SELECT title FROM ch09eu.movielens_movies WHERE movieId=96481) title,
+    userId
+  FROM
+    allUsers
+))
+ORDER BY predicted_rating DESC
+LIMIT 100
+movieIduserIdSELECT * 
+FROM ML.RECOMMEND(MODEL ch09eu.movie_recommender_16)
+ML.WEIGHTSmovieId=96481userId=54192SELECT 
+   processed_input
+   , feature
+   , TO_JSON_STRING(factor_weights)
+   , intercept
+FROM ML.WEIGHTS(MODEL ch09eu.movie_recommender_16)
+WHERE
+(processed_input = 'movieId' AND feature = '96481')
+OR
+(processed_input = 'userId' AND feature = '54192')
+movieIduserIdCREATE OR REPLACE TABLE ch09eu.movielens_users AS
+SELECT
+  userId
+  , RAND() * COUNT(rating) AS loyalty
+  , CONCAT(SUBSTR(CAST(userId AS STRING), 0, 2)) AS postcode
+FROM
+  ch09eu.movielens_ratings
+GROUP BY userId
+WITH userFeatures AS (
+  SELECT 
+     u.*,
+     (SELECT ARRAY_AGG(weight) FROM UNNEST(factor_weights)) AS user_factors
+  FROM
+     ch09eu.movielens_users u
+  JOIN
+     ML.WEIGHTS(MODEL ch09eu.movie_recommender_16) w
+  ON
+     processed_input = 'userId' AND feature = CAST(u.userId AS STRING)
+)
+
+SELECT * FROM userFeatures
+LIMIT 5
+userIdWITH productFeatures AS (
+  SELECT 
+     p.* EXCEPT(genres)
+     , g
+     , (SELECT ARRAY_AGG(weight) FROM UNNEST(factor_weights)) AS product_factors
+  FROM
+     ch09eu.movielens_movies p, UNNEST(genres) g
+  JOIN
+     ML.WEIGHTS(MODEL ch09eu.movie_recommender_16) w
+  ON
+     processed_input = 'movieId' AND feature = CAST(p.movieId AS STRING)
+)
+
+SELECT * FROM productFeatures
+LIMIT 5
+CREATE OR REPLACE TABLE ch09eu.movielens_hybrid_dataset AS
+
+WITH userFeatures AS (
+  SELECT 
+     u.*,
+     (SELECT ARRAY_AGG(weight) FROM UNNEST(factor_weights)) AS user_factors
+  FROM
+     ch09eu.movielens_users u
+  JOIN
+     ML.WEIGHTS(MODEL ch09eu.movie_recommender_16) w
+  ON
+     processed_input = 'userId' AND feature = CAST(u.userId AS STRING)
+),
+
+productFeatures AS (
+  SELECT 
+     p.* EXCEPT(genres)
+     , g
+     , (SELECT ARRAY_AGG(weight) FROM UNNEST(factor_weights)) AS product_factors
+  FROM
+     ch09eu.movielens_movies p, UNNEST(genres) g
+  JOIN
+     ML.WEIGHTS(MODEL ch09eu.movie_recommender_16) w
+  ON
+     processed_input = 'movieId' AND feature = CAST(p.movieId AS STRING)
+)
+
+SELECT p.* EXCEPT(movieId), u.* EXCEPT(userId), rating 
+FROM productFeatures p, userFeatures u
+JOIN
+   ch09eu.movielens_ratings r
+ON
+   r.movieId = p.movieId AND r.userId = u.userId
+CREATE OR REPLACE FUNCTION ch09eu.arr_to_input_3(a ARRAY<FLOAT64>)
+RETURNS STRUCT<a1 FLOAT64, a2 FLOAT64, a3 FLOAT64> AS (
+STRUCT(
+    a[OFFSET(0)]
+    , a[OFFSET(1)]
+    , a[OFFSET(2)]
+));
+SELECT 
+  ch09eu.arr_to_input_3(a).*
+FROM
+(SELECT [34.23, 43.21, 63.21] AS a)
+ch09eu.arr_to_input_16_usersCREATE OR REPLACE MODEL ch09eu.movielens_recommender_hybrid 
+OPTIONS(model_type='linear_reg', input_label_cols=['rating'])
+AS
+
+SELECT
+  * EXCEPT(user_factors, product_factors)
+  , ch09eu.arr_to_input_16_users(user_factors).*
+  , ch09eu.arr_to_input_16_products(product_factors).*
+FROM
+  ch09eu.movielens_hybrid_dataset
+RAND()loyaltyDECLARE NUM_CLUSTERS INT64 DEFAULT 3;
+DECLARE MIN_ERROR FLOAT64 DEFAULT 1000.0;
+DECLARE BEST_NUM_CLUSTERS INT64 DEFAULT -1;
+DECLARE MODEL_NAME STRING;
+
+WHILE NUM_CLUSTERS < 8 DO
+
+  SET MODEL_NAME = CONCAT('ch09eu.london_station_clusters_', 
+                          CAST(NUM_CLUSTERS AS STRING));
+
+  CREATE OR REPLACE MODEL MODEL_NAME
+  OPTIONS(model_type='kmeans', 
+          num_clusters=NUM_CLUSTERS, 
+          standardize_features = true) AS
+  SELECT * except(station_name)
+  from ch09eu.stationstats;
+
+  SET error = (SELECT davies_bouldin_index FROM ML.EVALUATE(MODEL MODEL_NAME));
+  IF error < MIN_ERROR THEN
+     SET MIN_ERROR = error;
+     SET BEST_NUM_CLUSTERS = NUM_CLUSTERS;
+  END IF;
+  
+
+  SET NUM_CLUSTERS = NUM_CLUSTERS + 1;
+
+END WHILE
+def train_and_evaluate(num_clusters: Range, max_concurrent=3):
+    # grid search means to try all possible values in range
+    params = []
+    for k in num_clusters.values():
+        params.append(Params(k))
+    
+    # run all the jobs
+    print('Grid search of {} possible parameters'.format(len(params)))
+    pool = ThreadPool(max_concurrent)
+    results = pool.map(lambda p: p.run(), params)
+    
+    # sort in ascending order
+    return sorted(results, key=lambda p: p._error)
+run()Paramsclass Params:
+    def __init__(self, num_clusters):
+        self._num_clusters = num_clusters
+        self._model_name = 'ch09eu.london_station_clusters_{}'.format(num_clusters)
+        self._train_query = """
+          CREATE OR REPLACE MODEL {}
+          OPTIONS(model_type='kmeans', 
+                  num_clusters={}, 
+                  standardize_features = true) AS
+          SELECT * except(station_name)
+          from ch09eu.stationstats
+        """.format(self._model_name, self._num_clusters)
+        self._eval_query = """
+          SELECT davies_bouldin_index AS error
+          FROM ML.EVALUATE(MODEL {});
+        """.format(self._model_name)
+        self._error = None
+        
+    def run(self):
+        bq = bigquery.Client(project=PROJECT)
+        job = bq.query(self._train_query, location='EU')
+        job.result() # wait for job to finish
+        evaldf = bq.query(self._eval_query, location='EU').to_dataframe()
+        self._error = evaldf['error'][0]
+        return self
+ch09eu.london_station_clusters_7           1.551265     7
+ch09eu.london_station_clusters_9           1.571020     9
+ch09eu.london_station_clusters_6           1.571398     6
+ch09eu.london_station_clusters_4           1.596398     4
+ch09eu.london_station_clusters_8           1.621974     8
+ch09eu.london_station_clusters_5           1.660766     5
+ch09eu.london_station_clusters_3           1.681441     3
+trainingInput:
+  scaleTier: CUSTOM
+  masterType: standard   # See: https://cloud.google.com/ml-engine/docs/tensorflow/machine-types
+  hyperparameters:
+    goal: MINIMIZE
+    maxTrials: 50
+    maxParallelTrials: 2
+    hyperparameterMetricTag: mean_absolute_error
+    params:
+    - parameterName: afternoon_start
+      type: INTEGER
+      minValue: 9
+      maxValue: 12
+      scaleType: UNIT_LINEAR_SCALE
+    - parameterName: afternoon_end
+      type: INTEGER
+      minValue: 15
+      maxValue: 19
+      scaleType: UNIT_LINEAR_SCALE
+    - parameterName: num_nodes_0
+      type: INTEGER
+      minValue: 10
+      maxValue: 100
+      scaleType: UNIT_LOG_SCALE
+    - parameterName: num_nodes_1
+      type: INTEGER
+      minValue: 3
+      maxValue: 10
+      scaleType: UNIT_LINEAR_SCALE
+def train_and_evaluate(args):        
+    model_name = "ch09eu.bicycle_model_dnn_{}_{}_{}_{}".format(
+        args.afternoon_start, args.afternoon_end, args.num_nodes_0, args.num_nodes_1
+    )
+    train_query = """
+        CREATE OR REPLACE MODEL {}
+        TRANSFORM(* EXCEPT(start_date)
+                  , IF(EXTRACT(dayofweek FROM start_date) BETWEEN 2 and 6, 'weekday', 'weekend') as dayofweek
+                  , ML.BUCKETIZE(EXTRACT(HOUR FROM start_date), [5, {}, {}]) AS hourofday
+        )
+        OPTIONS(input_label_cols=['duration'], 
+                model_type='dnn_regressor',
+                hidden_units=[{}, {}])
+        AS
+
+        SELECT 
+          duration
+          , start_station_name
+          , start_date
+        FROM `bigquery-public-data`.london_bicycles.cycle_hire
+    """.format(model_name, 
+               args.afternoon_start, 
+               args.afternoon_end,
+               args.num_nodes_0,
+               args.num_nodes_1)
+    logging.info(train_query)
+    bq = bigquery.Client(project=args.project, 
+                         location=args.location, 
+                         credentials=get_credentials())
+    job = bq.query(train_query)
+    job.result() # wait for job to finish
+    
+    eval_query = """
+        SELECT mean_absolute_error 
+        FROM ML.EVALUATE(MODEL {})
+    """.format(model_name)
+    logging.info(eval_info)
+    evaldf = bq.query(eval_query).to_dataframe()
+    return evaldf['mean_absolute_error'][0]  hpt.report_hyperparameter_tuning_metric(
+       hyperparameter_metric_tag='mean_absolute_error',
+       metric_value=error,
+       global_step=1)
+gcloud ai-platform jobs submit training $JOBNAME \
+  --runtime-version=1.13 \
+  --python-version=3.5 \
+  --region=$REGION \
+  --module-name=trainer.train_and_eval \
+  --package-path=$(pwd)/trainer \
+  --job-dir=gs://$BUCKET/hparam/ \
+  --config=hyperparam.yaml \
+  -- \
+  --project=$PROJECT --location=EU
+features = dict(
+  start_station_name=tf.FixedLenFeature([1], tf.string),
+  duration=tf.FixedLenFeature([1], tf.int32))
+reader = tf.contrib.cloud.BigQueryReader(project_id=PROJECT,
+            dataset_id=DATASET,
+            table_id=TABLE,
+            timestamp_millis=TIME,
+            num_partitions=NUM_PARTITIONS,
+            features=features)
+queue = tf.train.string_input_producer(reader.partitions())
+row_id, examples_serialized = reader.read(queue)
+examples = tf.parse_example(examples_serialized, features=features)
+batch_sizequery = """
+SELECT 
+  start_station_name 
+  , duration
+FROM `bigquery-public-data`.london_bicycles.cycle_hire 
+GROUP BY start_station_name
+"""
+df = bq.query(query, location='EU').to_dataframe()
+tf.estimator.inputs.pandas_input_fn(
+    df,
+    batch_size=128,
+    num_epochs=10,
+    shuffle=True,
+    num_threads=8,
+    target_column='duration'
+)
+_ = (
+          examples
+          | 'get_tfrecords' >> beam.Map(lambda x: x['tfrecord'])
+          | 'writetfr' >> beam.io.tfrecordio.WriteToTFRecord(
+              os.path.join(options['outdir'], 'tfrecord', step)))
+ tfexample = tf.train.Example(
+          features=tf.train.Features(
+              feature={
+                  'start_station_name': _bytes_feature(row['start_station_name']),
+                  'duration': _int64_feature(row['duration']),
+           }))
+tf.transformtf.data.tfrecorddatasetSavedModelmodel_typemodel_pathSavedModelCREATE OR REPLACE MODEL ch09eu.txtclass_tf
+OPTIONS (model_type='tensorflow',
+         model_path='gs://bucket/some/dir/1549825580/*')
+SELECT
+  input,
+  (SELECT AS STRUCT(p, ['github', 'nytimes', 'techcrunch'][ORDINAL(s)]) prediction FROM
+    (SELECT p, ROW_NUMBER() OVER() AS s FROM
+      (SELECT * FROM UNNEST(dense_1) AS p)) 
+  ORDER BY p DESC LIMIT 1).*
+FROM ML.PREDICT(MODEL advdata.txtclass_tf,
+(
+SELECT 'Unlikely Partnership in House Gives Lawmakers Hope for Border Deal' AS input
+UNION ALL SELECT "Fitbit\'s newest fitness tracker is just for employees and health insurance members"
+UNION ALL SELECT "Show HN: Hello, a CLI tool for managing social media"
+))
+

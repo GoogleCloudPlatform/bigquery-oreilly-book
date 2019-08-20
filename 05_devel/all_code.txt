@@ -1,0 +1,684 @@
+bqhttps://www.googleapis.com/bigquery/v2/projects/<PROJECT>/datasets/<DATASET>
+https://www.googleapis.com/bigquery/v2curlDELETE/projects/<PROJECT>/datasets/<DATASET> /projects/<PROJECT>/datasets/<DATASET>/tables/<TABLE>
+.../projects/<PROJECT>/datasets/<DATASET>/tables
+#!/bin/bash
+PROJECT=$(gcloud config get-value project)
+access_token=$(gcloud auth application-default print-access-token)
+curl -H "Authorization: Bearer $access_token"  \
+    -H "Content-Type: application/json" \
+    -X GET "https://www.googleapis.com/bigquery/v2/projects/$PROJECT/datasets/ch04/tables"
+.../projects/$PROJECT/datasets/ch04/tablescurlINFORMATION_SCHEMASELECT
+ table_name, creation_time
+FROM
+ ch04.INFORMATION_SCHEMA.TABLES
+INFORMATION_SCHEMACREATE TABLE
+CREATE TABLE IF NOT EXISTS
+CREATE OR REPLACE TABLE
+ALTER TABLE SET OPTIONS
+ALTER TABLE IF EXISTS SET OPTIONS
+INSERT INTO
+DELETE FROM
+UPDATE
+MERGE
+DROP TABLE
+INFORMATION_SCHEMA.SCHEMATA
+INFORMATION_SCHEMA.SCHEMATA_OPTIONS
+INFORMATION_SCHEMA.TABLES
+INFORMATION_SCHEMA.TABLE_OPTIONS
+INFORMATION_SCHEMA.COLUMNS
+INFORMATION_SCHEMA.COLUMN_FIELD_PATHS
+INFORMATION_SCHEMA.JOBS_BY_USER
+INFORMATION_SCHEMA.JOBS_BY_PROJECT
+INFORMATION_SCHEMA.JOBS_BY_ORGANIZATION
+.../projects/<PROJECT>/queries{
+ "useLegacySql": false,
+  "query": \"${QUERY_TEXT}\"
+}
+QUERY_TEXTread -d '' QUERY_TEXT << EOF
+SELECT 
+  start_station_name
+  , AVG(duration) as duration
+  , COUNT(duration) as num_trips
+FROM \`bigquery-public-data\`.london_bicycles.cycle_hire
+GROUP BY start_station_name 
+ORDER BY num_trips DESC 
+LIMIT 5
+EOF
+curl -H "Authorization: Bearer $access_token"  \
+    -H "Content-Type: application/json" \
+    -X POST \
+    -d "$request" \
+    "https://www.googleapis.com/bigquery/v2/projects/$PROJECT/queries"
+$request"schema": {
+  "fields": [
+   {
+    "name": "start_station_name",
+    "type": "STRING",
+    "mode": "NULLABLE"
+   },
+   {
+    "name": "duration",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+   },
+   {
+    "name": "num_trips",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
+   }
+  ]
+ },
+{
+   "f": [
+    {
+     "v": "Belgrove Street , King's Cross"
+    },
+    {
+     "v": "1011.0766960393793"
+    },
+    {
+     "v": "234458"
+    }
+   ]
+},
+fv{
+ "useLegacySql": false,
+ "timeoutMs": 0,
+ "useQueryCache": false,
+ "query": \"${QUERY_TEXT}\"
+}
+{
+ "kind": "bigquery#queryResponse",
+ "jobReference": {
+  "projectId": "cloud-training-demos",
+  "jobId": "job_gv0Kq8nWzXIkuBwoxsKMcTJIVbX4",
+  "location": "EU"
+ },
+ "jobComplete": false
+}
+.../projects/<PROJECT>/jobs/<JOBID>
+jobComplete.../projects/<PROJECT>/queries/<JOBID>pip install google-cloud-bigquery
+from google.cloud import bigquery
+bq = bigquery.Client(project=PROJECT)
+bqdsinfo = bq.get_dataset('bigquery-public-data.london_bicycles')
+dsinfo = bq.get_dataset('ch04')
+dsinfoprint(dsinfo.dataset_id)
+print(dsinfo.created)
+ch04ch04
+2019-01-26 00:41:01.350000+00:00
+print('{} created on {} in {}'.format(
+      dsinfo.dataset_id, dsinfo.created, dsinfo.location))
+bigquery-public-data.london_bicycleslondon_bicycles created on 2017-05-25 13:26:18.055000+00:00 in EU
+dsinfoREADERfor access in dsinfo.access_entries:
+    if access.role == 'READER':
+        print(access)
+<AccessEntry: role=READER, specialGroup=allAuthenticatedUsers>
+<AccessEntry: role=READER, domain=google.com>
+<AccessEntry: role=READER, specialGroup=projectReaders>
+ch05dataset_id = "{}.ch05".format(PROJECT)
+ds = bq.create_dataset(dataset_id, exists_ok=True)
+Datasetdsinfolocationcreate_datasetDatasetdataset_iddataset_id = "{}.ch05eu".format(PROJECT)
+dsinfo = bigquery.Dataset(dataset_id)
+dsinfo.location = 'EU'
+ds = bq.create_dataset(dsinfo, exists_ok=True)
+ch05bq.delete_dataset('ch05', not_found_ok=True)
+bq.delete_dataset('{}.ch05'.format(PROJECT), not_found_ok=True)dsinfoupdate_datasetdsinfo = bq.get_dataset("ch05")
+print(dsinfo.description)
+dsinfo.description = "Chapter 5 of BigQuery: The Definitive Guide"
+dsinfo = bq.update_dataset(dsinfo, ['description'])
+print(dsinfo.description)
+printNonech05update_datasetNone
+Chapter 5 of BigQuery: The Definitive Guide
+dsinfo = bq.get_dataset("ch05")
+entry = bigquery.AccessEntry(
+    role="READER",
+    entity_type="userByEmail",
+    entity_id="xyz@google.com",
+)
+if entry not in dsinfo.access_entries:
+  entries = list(dsinfo.access_entries)
+  entries.append(entry)
+  dsinfo.access_entries = entries
+  dsinfo = bq.update_dataset(dsinfo, ["access_entries"])  # API request
+else:
+  print('{} already has access'.format(entry.entity_id))
+print(dsinfo.access_entries)
+list_tablestables = bq.list_tables("bigquery-public-data.london_bicycles")
+for table in tables:
+    print(table.table_id)
+cycle_hire
+cycle_stations
+COUNT(*)table = bq.get_table(
+           "bigquery-public-data.london_bicycles.cycle_stations")
+print('{} rows in {}'.format(table.num_rows, table.table_id))
+787 rows in cycle_stations
+table = bq.get_table(
+          "bigquery-public-data.london_bicycles.cycle_stations")
+for field in table.schema:
+  if 'count' in field.name:
+    print(field)
+SchemaField('bikes_count', 'INTEGER', 'NULLABLE', '', ())
+SchemaField('docks_count', 'INTEGER', 'NULLABLE', '', ())
+bq.delete_table('ch05.temp_table', not_found_ok=True)
+bq --location=US cp ch05.temp_table@1418864998000 ch05.temp_table2
+1418864998000 table_id = '{}.ch05.temp_table'.format(PROJECT)
+table = bq.create_table(table_id, exists_ok=True)
+
+schema = [
+  bigquery.SchemaField("chapter", "INTEGER", mode="REQUIRED"),
+  bigquery.SchemaField("title", "STRING", mode="REQUIRED"),
+]
+table_id = '{}.ch05.temp_table'.format(PROJECT)
+table = bq.get_table(table_id)
+print(table.etag)
+table.schema = schema
+table = bq.update_table(table, ["schema"])
+print(table.schema)
+print(table.etag)
+get_tableupdate_tabletable.etagNoneNULLABLEREQUIREDNULLABLErows = [
+  (1, u'What is BigQuery?'),
+  (2, u'Query essentials'),
+]
+errors = bq.insert_rows(table, rows)
+rows = [
+  ('3', u'Operating on data types'),
+  ('wont work', u'This will fail'),
+  ('4', u'Loading data into BigQuery'),
+]
+errors = bq.insert_rows(table, rows)
+print(errors)
+reasoninvalidindex=1location=chapter{'index': 1, 'errors': [{'reason': 'invalid', 'debugInfo': '', 'message': 'Cannot convert value to integer (bad value):wont work', 'location': 'chapter'}]} 
+
+reasonstopped{'index': 0, 'errors': [{'reason': 'stopped', 'debugInfo': '', 'message': '', 'location': ''}]}
+rows = [
+  (1, u'What is BigQuery?'),
+  (2, u'Query essentials'),
+]
+print(table.table_id, table.num_rows)
+errors = bq.insert_rows(table, rows)
+print(errors)
+table = bq.get_table(table_id)
+print(table.table_id, table.num_rows) # DELAYED
+table.num_rowsSELECT DISTINCT(chapter) FROM ch05.temp_table
+schema = [
+  bigquery.SchemaField("chapter", "INTEGER", mode="REQUIRED"),
+  bigquery.SchemaField("title", "STRING", mode="REQUIRED"),
+]
+table_id = '{}.ch05.temp_table2'.format(PROJECT)
+table = bigquery.Table(table_id, schema)
+table = bq.create_table(table, exists_ok=True)
+print('{} created on {}'.format(table.table_id, table.created))
+print(table.schema)
+temp_table2 created on 2019-03-03 19:30:18.324000+00:00
+[SchemaField('chapter', 'INTEGER', 'REQUIRED', None, ()), SchemaField('title', 'STRING', 'REQUIRED', None, ())]import pandas as pd
+data = [
+  (1, u'What is BigQuery?'),
+  (2, u'Query essentials'),
+]
+df = pd.DataFrame(data, columns=['chapter', 'title'])
+
+
+table_id = '{}.ch05.temp_table3'.format(PROJECT)
+job = bq.load_table_from_dataframe(df, table_id)
+job.result() # blocks and waits
+print("Loaded {} rows into {}".format(job.output_rows, 
+                                      tblref.table_id))
+from google.cloud.bigquery.job \
+     import LoadJobConfig, WriteDisposition, CreateDisposition
+load_config = LoadJobConfig(
+  create_disposition=CreateDisposition.CREATE_IF_NEEDED,
+  write_disposition=WriteDisposition.WRITE_TRUNCATE)
+job = bq.load_table_from_dataframe(df, table_id, 
+                                   job_config=load_config)
+CreateDispositionWriteDispositionCreateDisposition
+WriteDisposition
+CREATE_NEVER
+WRITE_APPEND
+
+WRITE_EMPTY
+
+WRITE_TRUNCATE
+CREATE_IF_NEEDED
+WRITE_APPEND
+job_config
+WRITE_EMPTY
+
+WRITE_TRUNCATE
+CreateDispositionWriteDisposition job_config = bigquery.LoadJobConfig()
+job_config.autodetect = True
+job_config.source_format = bigquery.SourceFormat.CSV
+job_config.null_marker = 'NULL'
+uri = "gs://bigquery-oreilly-book/college_scorecard.csv"
+table_id = '{}.ch05.college_scorecard_gcs'.format(PROJECT)
+job = bq.load_table_from_uri(uri, table_id, job_config=job_config)
+while not job.done():
+  print('.', end='', flush=True)
+  time.sleep(0.1)
+print('Done')
+table = bq.get_table(tblref)
+print("Loaded {} rows into {}.".format(table.num_rows, table.table_id))
+load_table_from_filewith gzip.open('../04_load/college_scorecard.csv.gz') as fp:
+  job = bq.load_table_from_file(fp, tblref, job_config=job_config)
+source_tbl = 'bigquery-public-data.london_bicycles.cycle_stations'
+dest_tbl = '{}.ch05eu.cycle_stations_copy'.format(PROJECT)
+job = bq.copy_table(source_tbl, dest_tbl, location='EU')
+job.result() # blocks and waits
+dest_table = bq.get_table(dest_tbl)
+print(dest_table.num_rows)
+extract_tablesource_tbl = 'bigquery-public-data.london_bicycles.cycle_stations'
+dest_uri = 'gs://{}/tmp/exported/cycle_stations'.format(BUCKET)
+config = bigquery.job.ExtractJobConfig(
+  destination_format =
+       bigquery.job.DestinationFormat.NEWLINE_DELIMITED_JSON)
+job = bq.extract_table(source_tbl, dest_uri, 
+                       location='EU', job_config=config)
+job.result() # blocks and waits
+tabledata.listcycle_stations table_id = 'bigquery-public-data.london_bicycles.cycle_stations'
+table = bq.get_table(table_id)
+rows = bq.list_rows(table, 
+                    start_index=0, 
+                    max_results=5)
+
+start_indexmax_resultsrows = bq.list_rows(table)
+
+page_size = 10000
+row_iter = bq.list_rows(table,
+                        page_size=page_size)
+for page in row_iter.pages:
+  rows = list(page)
+  # do something with rows ...
+  print(len(rows))
+idcountfields = [field for field in table.schema 
+                if 'count' in field.name or field.name == 'id']
+rows = bq.list_rows(table, 
+                    start_index=300, 
+                    max_results=5, 
+                    selected_fields=fields)
+fmt = '{!s:<10} ' * len(rows.schema)
+print(fmt.format(*[field.name for field in rows.schema]))
+for row in rows:
+  print(fmt.format(*row))
+id         bikes_count docks_count 
+658        20         30         
+797        20         30         
+238        21         32         
+578        22         32         
+477        26         36  query = """
+SELECT 
+  start_station_name 
+  , AVG(duration) as duration
+  , COUNT(duration) as num_trips
+FROM `bigquery-public-data`.london_bicycles.cycle_hire 
+GROUP BY start_station_name 
+ORDER BY num_trips DESC
+LIMIT 10
+"""
+config = bigquery.QueryJobConfig()
+config.dry_run = True
+job = bq.query(query, location='EU', job_config=config)
+print("This query will process {} bytes."
+          .format(job.total_bytes_processed))
+This query will process 903989528 bytes.
+forjob = bq.query(query, location='EU')
+fmt = '{!s:<40} {:>10d} {:>10d}'
+for row in job:
+    fields = (row['start_station_name'], 
+              (int)(0.5 + row['duration']), 
+              row['num_trips']) 
+    print(fmt.format(*fields))
+SELECTnum_tripsBelgrove Street , King's Cross                 1011     234458
+Hyde Park Corner, Hyde Park                    2783     215629
+Waterloo Station 3, Waterloo                    866     201630
+Black Lion Gate, Kensington Gardens            3588     161952
+Albert Gate, Hyde Park                         2359     155647
+Waterloo Station 1, Waterloo                    992     145910
+Wormwood Street, Liverpool Street               976     119447
+Hop Exchange, The Borough                      1218     115135
+Wellington Arch, Hyde Park                     2276     110260
+Triangle Car Park, Hyde Park                   2233     108347
+query = """
+SELECT 
+  start_station_name 
+  , AVG(duration) as duration
+  , COUNT(duration) as num_trips
+FROM `bigquery-public-data`.london_bicycles.cycle_hire 
+GROUP BY start_station_name
+"""
+df = bq.query(query, location='EU').to_dataframe()
+print(df.describe())
+describe          duration      num_trips
+count   880.000000     880.000000
+mean   1348.351153   27692.273864
+std     434.057829   23733.621289
+min       0.000000       1.000000
+25%    1078.684974   13033.500000
+50%    1255.889223   23658.500000
+75%    1520.504055   35450.500000
+max    4836.380090  234458.000000
+
+min_durationquery2 = """
+SELECT 
+  start_station_name 
+  , COUNT(duration) as num_trips
+FROM `bigquery-public-data`.london_bicycles.cycle_hire 
+WHERE duration >= @min_duration
+GROUP BY start_station_name 
+ORDER BY num_trips DESC
+LIMIT 10
+"""
+@min_durationquery2 = """
+SELECT 
+  start_station_name 
+  , COUNT(duration) as num_trips
+FROM `bigquery-public-data`.london_bicycles.cycle_hire 
+WHERE duration >= {}
+GROUP BY start_station_name 
+ORDER BY num_trips DESC
+LIMIT 10
+""".format(min_duration)
+job_configconfig = bigquery.QueryJobConfig()
+config.query_parameters = [
+  bigquery.ScalarQueryParameter('min_duration', "INT64", 600)
+]
+job = bq.query(query2, location='EU', job_config=config)
+
+fmt = '{!s:<40} {:>10d}'
+for row in job:
+    fields = (row['start_station_name'], 
+              row['num_trips']) 
+    print(fmt.format(*fields))
+Hyde Park Corner, Hyde Park                  203592
+Belgrove Street , King's Cross               168110
+Waterloo Station 3, Waterloo                 148809
+Albert Gate, Hyde Park                       145794
+Black Lion Gate, Kensington Gardens          137930
+Waterloo Station 1, Waterloo                 106092
+Wellington Arch, Hyde Park                   102770
+Triangle Car Park, Hyde Park                  99368
+Wormwood Street, Liverpool Street             82483
+Palace Gate, Kensington Gardens               80342
+#!/bin/bash
+
+IMAGE=--image-family=tf-latest-cpu
+INSTANCE_NAME=dlvm
+MAIL=google-cloud-customer@gmail.com  # CHANGE THIS
+
+echo "Launching $INSTANCE_NAME"
+gcloud compute instances create ${INSTANCE_NAME} \
+      --machine-type=n1-standard-2 \
+      --scopes=https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/userinfo.email \
+      ${IMAGE} \
+      --image-project=deeplearning-platform-release \
+      --boot-disk-device-name=${INSTANCE_NAME} \
+      --metadata="proxy-user-mail=${MAIL}"
+
+echo "Looking for Jupyter URL on $INSTANCE_NAME"
+while true; do
+   proxy=$(gcloud compute instances describe ${INSTANCE_NAME} 2> /dev/null | grep dot-datalab-vm)
+   if [ -z "$proxy" ]
+   then
+      echo -n "."
+      sleep 1
+   else
+      echo "done!"
+      echo "$proxy"
+      break
+   fi
+done
+!pip install google-cloud-bigquery
+%load_ext google.cloud.bigquery
+%%bigquery%%bigquery --project $PROJECT
+SELECT 
+  start_station_name 
+  , AVG(duration) as duration
+  , COUNT(duration) as num_trips
+FROM `bigquery-public-data`.london_bicycles.cycle_hire 
+GROUP BY start_station_name
+ORDER BY num_trips DESC
+LIMIT 5
+%%bigquerydf%%bigquery df --project $PROJECT
+SELECT 
+  start_station_name 
+  , AVG(duration) as duration
+  , COUNT(duration) as num_trips
+FROM `bigquery-public-data`.london_bicycles.cycle_hire 
+GROUP BY start_station_name
+ORDER BY num_trips DESC
+dfdf.describe()
+badtrips%%bigquery badtrips --project $PROJECT
+
+WITH all_bad_trips AS (
+SELECT 
+  start_station_name
+  , COUNTIF(duration < 600 AND start_station_name = end_station_name) AS bad_trips
+  , COUNT(*) as num_trips
+FROM `bigquery-public-data`.london_bicycles.cycle_hire
+WHERE EXTRACT(YEAR FROM start_date) = 2015
+GROUP BY start_station_name
+HAVING num_trips > 10
+)
+SELECT *, bad_trips / num_trips AS fraction_bad FROM all_bad_trips
+ORDER BY fraction_bad DESC
+badtrips.describe()
+
+fraction_badbadtrips.plot.scatter('num_trips', 'fraction_bad');
+
+fraction_badnum_tripsfraction_badnum_tripsseabornimport seaborn as sns
+ax = sns.regplot(badtrips['num_trips'],badtrips['fraction_bad']);
+ax.set_ylim(0, 0.05);
+fraction_badnum_tripsfraction_badnum_tripsfraction_badnum_tripsstations_to_examine = []
+for band in range(1,5):
+  min_trips = badtrips['num_trips'].quantile(0.2*(band))
+  max_trips = badtrips['num_trips'].quantile(0.2*(band+1))
+  query = 'num_trips >= {} and num_trips < {}'.format(
+                                     min_trips, max_trips)
+  print(query) # band
+  stations = badtrips.query(query)
+  stations = stations.sort_values(
+                  by=['fraction_bad'], ascending=False)[:5] 
+  print(stations) # 5 worst
+  stations_to_examine.append(stations)
+  print()
+num_trips >= 4826.4 and num_trips < 8511.8
+                 start_station_name  bad_trips  num_trips  fraction_bad
+6        River Street , Clerkenwell        221       8279      0.026694
+9   Courland Grove, Wandsworth Road        105       5369      0.019557
+10         Stanley Grove, Battersea         92       4882      0.018845
+12              Southern Grove, Bow        112       6152      0.018205
+18    Richmond Way, Shepherd's Bush        126       8149      0.015462
+num_trips >= 16509.2 and num_trips < 95740.0
+                  start_station_name  bad_trips  num_trips  fraction_bad
+25  Queen's Gate, Kensington Gardens        396      27457      0.014423
+74     Speakers' Corner 2, Hyde Park        468      41107      0.011385
+76        Cumberland Gate, Hyde Park        303      26981      0.011230
+77            Albert Gate, Hyde Park        729      66547      0.010955
+82      Triangle Car Park, Hyde Park        454      41675      0.010894
+stations_to_examine = pd.concat(stations_to_examine)
+bq = bigquery.Client(project=PROJECT)
+tblref = TableReference.from_string(
+                  '{}.ch05eu.bad_bikes'.format(PROJECT))
+job = bq.load_table_from_dataframe(stations_to_examine, tblref)
+job.result() # blocks and waits
+cycle_stations%%bigquery stations_to_examine --project $PROJECT
+SELECT 
+  start_station_name AS station_name
+  , num_trips
+  , fraction_bad
+  , latitude
+  , longitude
+FROM ch05eu.bad_bikes AS bad
+JOIN `bigquery-public-data`.london_bicycles.cycle_stations AS s
+ON bad.start_station_name = s.name
+foliumimport folium
+map_pts = folium.Map(location=[51.5, -0.15], zoom_start=12)
+for idx, row in stations_to_examine.iterrows():
+  folium.Marker( location=[row['latitude'], row['longitude']], 
+                 popup=row['station_name'] ).add_to(map_pts)
+install.packages("bigrquery", dependencies=TRUE)
+billing <- 'cloud-training-demos' # your project name
+sql <- "
+SELECT 
+  start_station_name
+  , AVG(duration) as duration
+    , COUNT(duration) as num_trips
+  FROM `bigquery-public-data`.london_bicycles.cycle_hire
+  GROUP BY start_station_name 
+  ORDER BY num_trips DESC 
+  LIMIT 5
+"
+tbl <- bq_project_query(billing, sql)
+bq_table_download(tbl, max_results=100)
+grid.tbl(tbl)
+bq_project_querybq_table_download!conda install rpy2
+%load_ext rpy2.ipython
+%%bigquery docks --project $PROJECT
+SELECT 
+  docks_count, latitude, longitude
+FROM `bigquery-public-data`.london_bicycles.cycle_stations
+WHERE bikes_count > 0
+lmdocks%%R -i docks
+mod <- lm(docks ~ latitude + longitude)
+summary(mod)
+durationscipyfrom scipy import stats
+ag,bg,cg = stats.gamma.fit(df['duration'])
+  opts = beam.pipeline.PipelineOptions(flags = [], **options)
+  RUNNER = 'DataflowRunner'
+  query = """
+      SELECT start_station_id, ARRAY_AGG(duration) AS duration_array
+      FROM `bigquery-public-data.london_bicycles.cycle_hire`
+      GROUP BY start_station_id
+      """
+
+  with beam.Pipeline(RUNNER, options = opts) as p:
+    (p 
+      | 'read_bq' >> beam.io.Read(beam.io.BigQuerySource(query=query))
+      | 'compute_fit' >> beam.Map(compute_fit)
+      | 'write_bq' >> beam.io.gcp.bigquery.WriteToBigQuery(
+          'ch05eu.station_stats', schema='station_id:string,ag:FLOAT64,bg:FLOAT64,cg:FLOAT64')
+    )
+compute_fitdef compute_fit(row):
+  from scipy import stats
+  result = {}
+  result['station_id'] = row['start_station_id']
+  durations = row['duration_array']
+  ag, bg, cg = stats.gamma.fit(durations)
+  result['ag'] = ag
+  result['bg'] = bg
+  result['cg'] = cg
+  return result
+
+PROJECT_IDcreateBigQueryPresentationfunction createBigQueryPresentation() {
+  var spreadsheet = runQuery();
+  Logger.log('Results spreadsheet created: %s', spreadsheet.getUrl());
+  var chart = createColumnChart(spreadsheet); // UPDATED
+  var deck = createSlidePresentation(spreadsheet, chart); // NEW
+  Logger.log('Results slide deck created: %s', deck.getUrl()); // NEW
+}
+runQuerycreateColumnChartcreateSlidePresentationvar queryResults = BigQuery.Jobs.query(request, PROJECT_ID);
+var rows = queryResults.rows;
+  while (queryResults.pageToken) {
+    queryResults = BigQuery.Jobs.getQueryResults(PROJECT_ID, jobId, {
+      pageToken: queryResults.pageToken
+    });
+    rows = rows.concat(queryResults.rows);
+  }
+bqbqbqbq mk bq mk --location=US \
+      --default_table_expiration 3600 \
+      --description "Chapter 5 of BigQuery Book." \
+      ch05
+bq mk#!/bin/bash
+bq_safe_mk() {
+    dataset=$1
+    exists=$(bq ls --dataset | grep -w $dataset)
+    if [ -n "$exists" ]; then
+       echo "Not creating $dataset since it already exists"
+    else
+       echo "Creating $dataset"
+       bq mk $dataset
+    fi
+}
+# this is how you call the function
+bq_safe_mk ch05
+ch05gcloud authbq mk --location=US \
+      --default_table_expiration 3600 \
+      --description "Chapter 5 of BigQuery Book." \
+      projectname:ch05
+bq mkch05.rentals_last_hourrental_iddurationbq mk --table \
+   --expiration 3600 \
+   --description "One hour of data" \
+    --label persistence:volatile \
+    ch05.rentals_last_hour  rental_id:STRING,duration:FLOAT
+persistencevolatilebq mk --table \
+   --expiration 3600 \
+   --description "One hour of data" \
+    --label persistence:volatile \
+    ch05.rentals_last_hour  schema.json
+bq cp ch04.old_table ch05.new_table
+bq waitbq wait --fail_on_error job_id
+bq wait --fail_on_error job_id 600job_idbq loadbq insertbq insert ch05.rentals_last_hour data.json
+{"rental_id":"345ce4", "duration":240}
+bq extractbq extract --format=json ch05.bad_bikes gs://bad_bikes.jsonbq querybq query \
+     --use_legacy_sql=false \
+     'SELECT MAX(duration) FROM `bigquery-public-data`.london_bicycles.cycle_hire'
+echo "SELECT MAX(duration) FROM `bigquery-public-data`.london_bicycles.cycle_hire" \
+| bq query --use_legacy_sql=false
+#!/bin/bash
+read -d '' QUERY_TEXT << EOF
+SELECT 
+  start_station_name
+  , AVG(duration) as duration
+  , COUNT(duration) as num_trips
+FROM \`bigquery-public-data\`.london_bicycles.cycle_hire
+GROUP BY start_station_name 
+ORDER BY num_trips DESC 
+LIMIT 5
+EOF
+bq query --project_id=some_project --use_legacy_sql=false $QUERY_TEXT
+bq query--use_legacy_sql=falsebq.bigqueryrc
+ --location$BIGQUERYRC/.bigqueryrc$HOME/.bigqueryrc$BIGQUERYRC.bigqueryrc--location=EU
+--project_id=some_project
+[mk]
+--expiration=3600
+[query]
+--use_legacy_sql=false
+--location=EU some_projectbq mk--expiration=3600bq query--use_legacy_sql=false--expirationbq headSELECT *LIMITbq head -n 10 ch05.bad_bikes
+
+bq head -s 10 -n 10 ch05.bad_bikes
+bq mkrental_durationch05#!/bin/bash
+read -d '' QUERY_TEXT << EOF
+SELECT 
+  start_station_name
+  , duration/60 AS duration_minutes
+FROM \`bigquery-public-data\`.london_bicycles.cycle_hire
+EOF
+bq mk --view=$QUERY_TEXT  ch05.rental_duration
+--view--materialized_viewbq ls --datasetbq ls ch05
+ch05
+bq ls -p
+bq ls -j some_project
+bq ls --dataset
+bq ls --dataset some_project
+bq ls --models
+bq ls --transfer_run \
+        --filter='states:PENDING' \
+        --run_attempt='LATEST' \   
+        projects/p/locations/l/transferConfigs/c
+bq ls --reservation_grant \
+      --project_id=some_proj \
+      --location='us'
+bq showbq show ch05
+ch05
+bq show -j some_job_id
+bq show --schema ch05.bad_bikes
+ch05.bad_bikesbq show --view ch05.some_view
+bq show --materialized_view ch05.some_view
+bq show --model ch05.some_model
+bq show --transfer_run \
+  projects/p/locations/l/transferConfigs/c/runs/r
+bq updatebq update --description "Bikes that need repair" ch05.bad_bikes
+bqupdatebq update \
+   --view "SELECT ..."\
+   ch05.rental_durationbq update --reservation --location=US \
+          --project_id=some_project \
+          --reservation_size=2000000000
+bq
