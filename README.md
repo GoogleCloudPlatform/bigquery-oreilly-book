@@ -19,3 +19,7 @@ Source code accompanying:
     <a href="https://www.oreilly.com/library/view/google-bigquery-the/9781492044451/">Read online on Safari</a>
   </td>
 </table>
+
+
+Articles that update parts of the book:
+1. Integration between TensorFlow 2.0 and BigQuery: https://towardsdatascience.com/how-to-read-bigquery-data-from-tensorflow-2-0-efficiently-9234b69165c8
