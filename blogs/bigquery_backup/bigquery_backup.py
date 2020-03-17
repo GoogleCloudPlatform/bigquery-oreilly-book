@@ -1,13 +1,10 @@
 #!/bin/env python3
 
 import logging
-import subprocess
 import argparse
-import json
-import tempfile
 import os
 
-from helper_utils import exec_shell_command, exec_shell_pipeline
+from helper_utils import exec_shell_command, exec_shell_pipeline, write_json_string
 
 def backup_table(dataset, tablename, todir, schemaonly):
     """
@@ -19,23 +16,23 @@ def backup_table(dataset, tablename, todir, schemaonly):
     :return: None
     """
 
+    full_table_name = '{}.{}'.format(dataset, tablename)
+
     # write schema to GCS
-    schema = exec_shell_command(['bq', 'show', '--schema', '{}.{}'.format(dataset, tablename)])
-    schema = json.loads(schema)
-    logging.info(schema)
-    fd, fname = tempfile.mkstemp()
-    with open(fname, 'w') as ofp:
-        json.dump(schema, ofp, sort_keys=False, indent=2)
-    os.close(fd)
-    output_schema_name = os.path.join(todir,
-                                      '{}/{}_schema.json'.format(dataset, tablename)
-                                      )
-    exec_shell_command(['gsutil', 'cp', fname, output_schema_name])
+    schema = exec_shell_command(['bq', 'show', '--schema', full_table_name])
+    write_json_string(schema,
+                      os.path.join(todir, dataset, tablename, 'schema.json')
+                      )
 
     if not schemaonly:
-        # also back up the data
-        output_data_name = os.path.join(todir,
-                                        '{}/{}_data.avro'.format(dataset, tablename))
+        # back up the table definition
+        tbldef = exec_shell_command(['bq', '--format=json', 'show', full_table_name])
+        write_json_string(tbldef,
+                          os.path.join(todir, dataset, tablename, 'tbldef.json')
+                          )
+
+        # read the data
+        output_data_name = os.path.join(todir, dataset, tablename, 'data_*.avro')
         _ = exec_shell_command([
             'bq', 'extract',
             '--destination_format=AVRO',
