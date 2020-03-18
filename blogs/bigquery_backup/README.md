@@ -1,5 +1,8 @@
 ## Backup (and restore) a BigQuery table or dataset
 
+Accompanies the blog post:
+https://medium.com/google-cloud/how-to-backup-a-bigquery-table-or-dataset-to-google-cloud-storage-and-restore-from-it-6ef7eb322c6d
+
 ### Example usage
 
 1. Backup a table to GCS
