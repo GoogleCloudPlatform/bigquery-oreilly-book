@@ -1,7 +1,22 @@
-#!/bin/env python3
+#!/usr/bin/env python3
+
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import logging
 import argparse
+import json
 import os
 
 from helper_utils import exec_shell_command, exec_shell_pipeline, write_json_string
@@ -31,6 +46,10 @@ def backup_table(dataset, tablename, todir, schemaonly):
                           os.path.join(todir, dataset, tablename, 'tbldef.json')
                           )
 
+        tbldef = json.loads(tbldef)  # array of dicts
+        if tbldef['type'] == 'VIEW':
+            return  # no need to extract data
+
         # read the data
         output_data_name = os.path.join(todir, dataset, tablename, 'data_*.avro')
         _ = exec_shell_command([
@@ -39,9 +58,6 @@ def backup_table(dataset, tablename, todir, schemaonly):
             '{}.{}'.format(dataset, tablename),
             output_data_name
         ])
-
-
-
 
 
 if __name__ == '__main__':
@@ -63,12 +79,18 @@ if __name__ == '__main__':
         tables = [table]
     else:
         dataset = args.input
-        tables = exec_shell_pipeline([
-            ['bq', 'ls', 'advdata'],
-            ['awk', "{print $1}"],
-            ['tail', '+3']
-        ]).split()
-
+        dataset_contents = exec_shell_command(
+            ['bq', '--format=json', 'ls', dataset]
+        )
+        dataset_contents = json.loads(dataset_contents) # array of dicts
+        tables = []
+        for entry in dataset_contents:
+            if entry['type'] == 'TABLE' or entry['type'] == 'VIEW':
+                tables.append(entry['tableReference']['tableId'])
+            else:
+                logging.warning('Not backing up {} because it is a {}'.format(entry['id'], entry['type']))
+        print(tables)
 
     for table in tables:
         backup_table(dataset, table, args.output, args.schema)
+

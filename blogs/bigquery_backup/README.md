@@ -19,6 +19,8 @@ This saves a schema.json, a tabledef.json, and extracted data in AVRO format to 
 ./bq_restore.py --input gs://BUCKET/backup/fromdataset/fromtable --output destdataset
 ```
 
+For views, the backup stores the view definition and the restore creates a view.
+The data behind the view is not backed up.
 
 
 ### Dependencies
