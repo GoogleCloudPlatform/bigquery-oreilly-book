@@ -22,6 +22,7 @@ Source code accompanying:
 
 
 Articles that update parts of the book:
-1. Integration between TensorFlow 2.0 and BigQuery: https://towardsdatascience.com/how-to-read-bigquery-data-from-tensorflow-2-0-efficiently-9234b69165c8
-2. Backing up and restoring a BigQuery table/view/dataset: 
+* Integration between TensorFlow 2.0 and BigQuery: https://towardsdatascience.com/how-to-read-bigquery-data-from-tensorflow-2-0-efficiently-9234b69165c8
+* How to query geographic raster data in BigQuery efficiently  https://medium.com/google-cloud/how-to-query-geographic-raster-data-in-bigquery-efficiently-b178b1a5e723
+* Backing up and restoring a BigQuery table/view/dataset: 
 https://medium.com/google-cloud/how-to-backup-a-bigquery-table-or-dataset-to-google-cloud-storage-and-restore-from-it-6ef7eb322c6d
