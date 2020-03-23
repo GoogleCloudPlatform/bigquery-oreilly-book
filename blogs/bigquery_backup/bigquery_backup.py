@@ -55,6 +55,7 @@ def backup_table(dataset, tablename, todir, schemaonly):
         _ = exec_shell_command([
             'bq', 'extract',
             '--destination_format=AVRO',
+            '--use_avro_logical_types', # for DATE, TIME, NUMERIC
             '{}.{}'.format(dataset, tablename),
             output_data_name
         ])
