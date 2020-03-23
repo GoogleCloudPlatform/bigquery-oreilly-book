@@ -54,6 +54,7 @@ def restore_table(fromdir, todataset):
     load_command = [
         'bq', 'load',
         '--source_format', 'AVRO',
+        '--use_avro_logical_types', # for DATE, TIME, NUMERIC
     ]
 
     # get table definition
