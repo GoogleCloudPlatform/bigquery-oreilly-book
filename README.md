@@ -26,3 +26,7 @@ Articles that update parts of the book:
 * How to query geographic raster data in BigQuery efficiently  https://medium.com/google-cloud/how-to-query-geographic-raster-data-in-bigquery-efficiently-b178b1a5e723
 * Backing up and restoring a BigQuery table/view/dataset: 
 https://medium.com/google-cloud/how-to-backup-a-bigquery-table-or-dataset-to-google-cloud-storage-and-restore-from-it-6ef7eb322c6d
+https://towardsdatascience.com/training-a-recommendation-model-for-google-analytics-data-using-bigquery-ml-2327f9a2e8e9
+* How to copy a BigQuery dataset from one region to another https://medium.com/google-cloud/how-to-copy-a-bigquery-dataset-from-one-region-to-another-8388d74da2ac
+* Training a recommendation model for Google Analytics data using BigQuery ML https://towardsdatascience.com/training-a-recommendation-model-for-google-analytics-data-using-bigquery-ml-2327f9a2e8e9
+* Using BigQuery (and BigQuery ML) from Kubeflow Pipelines https://medium.com/google-cloud/using-bigquery-and-bigquery-ml-from-kubeflow-pipelines-991a2fa4bea8
