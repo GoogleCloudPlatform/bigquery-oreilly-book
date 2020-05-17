@@ -30,3 +30,5 @@ https://towardsdatascience.com/training-a-recommendation-model-for-google-analyt
 * How to copy a BigQuery dataset from one region to another https://medium.com/google-cloud/how-to-copy-a-bigquery-dataset-from-one-region-to-another-8388d74da2ac
 * Training a recommendation model for Google Analytics data using BigQuery ML https://towardsdatascience.com/training-a-recommendation-model-for-google-analytics-data-using-bigquery-ml-2327f9a2e8e9
 * Using BigQuery (and BigQuery ML) from Kubeflow Pipelines https://medium.com/google-cloud/using-bigquery-and-bigquery-ml-from-kubeflow-pipelines-991a2fa4bea8
+* Displaying BigQuery results on Google Maps using Data Studio https://medium.com/google-cloud/displaying-bigquery-results-on-google-maps-using-data-studio-bded264bfd53
+* Using BigQuery Flex Slots to run machine learning workloads more efficiently https://medium.com/google-cloud/using-bigquery-flex-slots-to-run-machine-learning-workloads-more-efficiently-7fc7f400f7a7
