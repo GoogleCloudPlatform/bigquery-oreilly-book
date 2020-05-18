@@ -7,11 +7,14 @@ CREATE TEMPORARY FUNCTION CLIP_GT(x FLOAT64, b FLOAT64) AS (
 CREATE TEMPORARY FUNCTION CLIP(x FLOAT64, a FLOAT64, b FLOAT64) AS (
   CLIP_GT(CLIP_LESS(x, a), b)
 );
+
 CREATE OR REPLACE TABLE advdata.ga360_recommendations_data
 AS
 WITH CTE_visitor_page_content AS (
     SELECT
-        fullVisitorID,
+        # Schema: https://support.google.com/analytics/answer/3437719?hl=en
+        # For a completely unique visit-session ID, we combine combination of fullVisitorId and visitNumber:
+        CONCAT(fullVisitorID,'-',CAST(visitNumber AS STRING)) AS visitorId,
         (SELECT MAX(IF(index=10, value, NULL)) FROM UNNEST(hits.customDimensions)) AS latestContentId,
         (LEAD(hits.time, 1) OVER (PARTITION BY fullVisitorId ORDER BY hits.time ASC) - hits.time) AS session_duration
     FROM
@@ -22,12 +25,13 @@ WITH CTE_visitor_page_content AS (
         hits.type = "PAGE"
 GROUP BY
         fullVisitorId,
+        visitNumber,
         latestContentId,
         hits.time ),
 aggregate_web_stats AS (
 -- Aggregate web stats
 SELECT
-    fullVisitorID as visitorId,
+    visitorId,
     latestContentId as contentId,
     SUM(session_duration) AS session_duration
 FROM
@@ -35,7 +39,7 @@ FROM
 WHERE
     latestContentId IS NOT NULL
 GROUP BY
-    fullVisitorID,
+    visitorId,
     latestContentId
 HAVING
     session_duration > 0

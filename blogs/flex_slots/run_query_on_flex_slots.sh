@@ -19,7 +19,7 @@ PROJECT=$(gcloud config get-value project)
 LOCATION=US
 SLOTS=500
 run_query() {
-  cat ../bqml_recommendations/train.sql | bq query --sync -nouse_legacy_sql
+  cat ../bqml_recommendations/train.sql | bq query --sync -nouse_legacy_sql --location=${LOCATION}
 }
 #############
 
@@ -61,6 +61,9 @@ ASSIGNMENT=$((bq mk --reservation_assignment --reservation_id=${PROJECT}:${LOCAT
              --job_type=QUERY --assignee_type=PROJECT --assignee_id=${PROJECT} \
              | tail -2 | head -1 | awk '{print $1}') || cleanup )
 echo ${ASSIGNMENT}
+
+# give the slots about 30 s to get setup
+sleep 30
 
 run_query || true
 
