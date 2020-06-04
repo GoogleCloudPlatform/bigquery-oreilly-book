@@ -1,0 +1,14 @@
+default:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account  # or oauth
+      project: ai-analytics-solutions  # CHANGE
+      dataset: ch04
+      threads: 1
+      keyfile: /home/jupyter/.dbt/keyfile.json
+      timeout_seconds: 600
+      location: US
+      priority: interactive
+      retries: 3

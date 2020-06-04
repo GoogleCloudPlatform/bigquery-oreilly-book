@@ -1,0 +1,1 @@
+../../04_load/load_external_gcs.sh
