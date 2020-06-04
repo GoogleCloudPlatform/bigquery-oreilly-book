@@ -33,10 +33,12 @@ on-run-start:
 # as tables. These settings can be overridden in the individual model files
 # using the `{{ config(...) }}` macro.
 models:
-  cleanup_numeric:
+  college_scorecard:
       materialized: table
       description: ELT of College Scorecard Data, after numeric data is transformed
   selective_firstgen:
+      materialized: table
+      description: Selective colleges that are friendly to first-gen students
+  selective_firstgen_top10:
       materialized: view
-      description: The 10 most selective colleges that are friendly to first-gen students
-
+      description: The 10 best colleges in terms of affordability, selectiveness, and support
