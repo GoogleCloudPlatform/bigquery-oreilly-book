@@ -1,12 +1,10 @@
 #!/bin/bash
 
-#python3 -m pip install dbt
+python3 -m pip install dbt
 
 ACCTNAME=dbt-svc-acct
 PROJECT=$(gcloud config get-value project)
 echo "Creating ${ACCTNAME} in ${PROJECT}"
-
-<< 'multiline-comment'
 
 gcloud iam service-accounts create ${ACCTNAME} --description="DBT Service Account"
 gcloud iam service-accounts keys create keyfile.json \
@@ -27,6 +25,5 @@ for file in profiles.yml keyfile.json; do
 done
 cd ${workdir}
 
+<< 'multiline-comment'
 multiline-comment
-
-./load_external_gcs.sh
