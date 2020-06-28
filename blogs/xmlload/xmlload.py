@@ -1,3 +1,8 @@
+
+import argparse
+import logging
+import apache_beam as beam
+
 def parse_into_dict(xmlfile):
     import xmltodict
     with open(xmlfile) as ifp:
@@ -12,6 +17,7 @@ table_schema = {
         {'name' : 'ShipInfo', 'type': 'RECORD', 'mode': 'NULLABLE', 'fields': [
             {'name' : 'ShippedDate', 'type': 'STRING', 'mode': 'NULLABLE'},
             {'name' : 'ShipVia', 'type': 'STRING', 'mode': 'NULLABLE'},
+            {'name' : 'Freight', 'type': 'STRING', 'mode': 'NULLABLE'},
             {'name' : 'ShipName', 'type': 'STRING', 'mode': 'NULLABLE'},
             {'name' : 'ShipAddress', 'type': 'STRING', 'mode': 'NULLABLE'},
             {'name' : 'ShipCity', 'type': 'STRING', 'mode': 'NULLABLE'},
@@ -36,23 +42,30 @@ def get_orders(doc):
     for order in doc['Root']['Orders']['Order']:
         yield cleanup(order)
 
-def run(to_bq):
-    import apache_beam as beam
-    p = beam.Pipeline()
-    orders = (p 
-         | 'files' >> beam.Create(['orders.xml'])
-         | 'parse' >> beam.Map(lambda filename: parse_into_dict(filename))
-         | 'orders' >> beam.FlatMap(lambda doc: get_orders(doc)))
+def run(argv=None):
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+      '--output',
+      required=True,
+      help=(
+          'Specify text file orders.txt or BigQuery table project:dataset.table '))
     
-    if to_bq:
-         orders | 'tobq' >> beam.io.WriteToBigQuery('ai-analytics-solutions:advdata.fromxml',
-                                   schema=table_schema,
-                                   write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND, #WRITE_TRUNCATE
-                                   create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED)
-    else:
-        orders | 'totxt' >> beam.io.WriteToText('orders.txt')
-        
-    p.run().wait_until_finish()
+    known_args, pipeline_args = parser.parse_known_args(argv)    
+    with beam.Pipeline(argv=pipeline_args) as p:
+        orders = (p 
+             | 'files' >> beam.Create(['orders.xml'])
+             | 'parse' >> beam.Map(lambda filename: parse_into_dict(filename))
+             | 'orders' >> beam.FlatMap(lambda doc: get_orders(doc)))
+
+        if '.txt' in known_args.output:
+             orders | 'totxt' >> beam.io.WriteToText(known_args.output)
+        else:
+             orders | 'tobq' >> beam.io.WriteToBigQuery(known_args.output,
+                                       schema=table_schema,
+                                       write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND, #WRITE_TRUNCATE
+                                       create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED)
+
     
 if __name__ == '__main__':
-    run(False)
+    logging.getLogger().setLevel(logging.INFO)
+    run()
