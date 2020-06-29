@@ -15,7 +15,6 @@ table_schema = {
         {'name' : 'OrderDate', 'type': 'STRING', 'mode': 'NULLABLE'},
         {'name' : 'RequiredDate', 'type': 'STRING', 'mode': 'NULLABLE'},
         {'name' : 'ShipInfo', 'type': 'RECORD', 'mode': 'NULLABLE', 'fields': [
-            {'name' : 'ShippedDate', 'type': 'STRING', 'mode': 'NULLABLE'},
             {'name' : 'ShipVia', 'type': 'STRING', 'mode': 'NULLABLE'},
             {'name' : 'Freight', 'type': 'STRING', 'mode': 'NULLABLE'},
             {'name' : 'ShipName', 'type': 'STRING', 'mode': 'NULLABLE'},
@@ -24,6 +23,7 @@ table_schema = {
             {'name' : 'ShipRegion', 'type': 'STRING', 'mode': 'NULLABLE'},
             {'name' : 'ShipPostalCode', 'type': 'STRING', 'mode': 'NULLABLE'},
             {'name' : 'ShipCountry', 'type': 'STRING', 'mode': 'NULLABLE'},
+            {'name' : 'ShippedDate', 'type': 'STRING', 'mode': 'NULLABLE'},
         ]},
     ]
 }
