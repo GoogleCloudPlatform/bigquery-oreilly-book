@@ -22,7 +22,15 @@ Source code accompanying:
 
 ## After June 2020
 Articles that update parts of the book
+* [Validating successful execution of BigQuery scripts using ASSERT](https://medium.com/google-cloud/validating-successful-execution-of-bigquery-scripts-using-assert-c82f7ff9cfa8)
 * [RANGE_BUCKET](https://stackoverflow.com/questions/62355815/how-do-you-replace-a-value-by-its-percentile-in-bigquery)
+* [How to right-size your flat-rate and flex slots reservations in BigQuery](https://medium.com/google-cloud/how-to-move-from-on-demand-pricing-to-reservations-in-bigquery-65552cbebd45)
+* [How to do text similarity search and document clustering in BigQuery](https://towardsdatascience.com/how-to-do-text-similarity-search-and-document-clustering-in-bigquery-75eb8f45ab65)
+* [Trying out Data QnA on BigQuery and Google Sheets](https://medium.com/daas-labs/trying-out-data-qna-on-bigquery-and-google-sheets-e47939fddf25)
+* [How to load XML data into BigQuery using Python Dataflow](https://medium.com/google-cloud/how-to-load-xml-data-into-bigquery-using-python-dataflow-fd1580e4af48)
+* [The best of both worlds: Calling Auto ML from BigQuery](https://towardsdatascience.com/the-best-of-both-worlds-calling-auto-ml-from-bigquery-9dfd433a45d6)
+* [Loading and transforming data into BigQuery using dbt](https://medium.com/google-cloud/loading-and-transforming-data-into-bigquery-using-dbt-65307ad401cd)
+
 
 ## January 2020 to June 2020
 Articles that update parts of the book, and incorporated into text in June 12, 2020 edition.
