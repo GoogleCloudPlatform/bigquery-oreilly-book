@@ -1,0 +1,3 @@
+[submodule "blogs/dataform/bikes_weather"]
+	path = blogs/dataform/bikes_weather
+	url = git@github.com:lakshmanok/bikes_weather.git
