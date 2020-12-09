@@ -1,0 +1,26 @@
+config {
+  type: "table",
+  schema: "staging",
+  description: "Cleaned up data corresponding to New York City",
+  // column level documentation, defined in includes/docs.js
+  // columns: docs.nyc_weather
+}
+
+SELECT
+  date,
+  MAX(prcp) AS rain_mm,
+  MIN(tmin) AS tmin_celsius,
+  MAX(tmax) AS tmax_celsius
+FROM (
+  SELECT
+    wx.date AS date,
+    IF (wx.element = 'PRCP', wx.value/10, NULL) AS prcp,
+    IF (wx.element = 'TMIN', wx.value/10, NULL) AS tmin,
+    IF (wx.element = 'TMAX', wx.value/10, NULL) AS tmax
+  FROM
+    ${ref("ghcnd_2020")} AS wx
+  WHERE
+    wx.id = 'USW00094728'
+)
+GROUP BY
+  date
