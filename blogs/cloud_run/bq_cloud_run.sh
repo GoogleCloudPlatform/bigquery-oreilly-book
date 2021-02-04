@@ -9,12 +9,12 @@ SVC_ACCOUNT="${PROJECT_NO}-compute@developer.gserviceaccount.com"
 
 # Set up the necessary BigQuery tables
 bq show cloud_run_tmp || bq mk cloud_run_tmp
-bq show cloud_run_tmp2 || bq mk cloud_run_tmp2
 
 # Build docker image and deploy it to Cloud Run
 gcloud builds submit --tag ${CONTAINER}
 gcloud run deploy ${SERVICE} --image $CONTAINER --platform managed
 
+# exit;
 
 # Setup authentication
 gcloud config set run/region $REGION

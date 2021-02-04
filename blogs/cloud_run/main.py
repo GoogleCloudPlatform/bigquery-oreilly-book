@@ -34,10 +34,13 @@ def index():
         print(content)
         ds = content['resource']['labels']['dataset_id']
         proj = content['resource']['labels']['project_id']
-        if ds == 'cloud_run_tmp':
+        tbl = content['protoPayload']['resourceName']
+        rows = int(content['protoPayload']['metadata']['tableDataChange']['insertedRowsCount'])
+        if ds == 'cloud_run_tmp' and tbl.endswith('tables/cloud_run_trigger') and rows > 0:
             query = create_agg()
             return "table created", 200
     except:
+        # if these fields are not in the JSON, ignore
         pass
     return "ok", 200
 
@@ -47,6 +50,7 @@ def index():
 def create_agg():
     client = bigquery.Client()
     query = """
+CREATE OR REPLACE TABLE cloud_run_tmp.created_by_trigger AS
 SELECT 
   name, SUM(number) AS n
 FROM cloud_run_tmp.cloud_run_trigger
