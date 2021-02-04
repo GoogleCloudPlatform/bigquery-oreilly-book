@@ -47,14 +47,12 @@ def index():
 def create_agg():
     client = bigquery.Client()
     query = """
-        CREATE OR REPLACE TABLE cloud_run_tmp2.created_by_trigger AS
-        SELECT
-           INSTNM, ADM_RATE_ALL, FIRST_GEN, MD_FAMINC, SAT_AVG
-        FROM
-           ch04.selective_firstgen
-        ORDER BY
-           MD_FAMINC ASC
-        LIMIT 10
+SELECT 
+  name, SUM(number) AS n
+FROM cloud_run_tmp.cloud_run_trigger
+GROUP BY name
+ORDER BY n desc
+LIMIT 10
     """
     client.query(query)
     return query
