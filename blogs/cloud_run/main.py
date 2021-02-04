@@ -16,21 +16,48 @@
 import os
 
 from flask import Flask, request
-
+import json
+from google.cloud import bigquery
 
 app = Flask(__name__)
+
+
 # [END eventarc_gcs_server]
 
 
 # [START eventarc_gcs_handler]
 @app.route('/', methods=['POST'])
 def index():
-    # Gets the BigQuery table name from the CloudEvent header
-    table = request.headers.get('ce-subject')
+    # Gets the Payload data from the Audit Log
+    content = request.json
+    try:
+        print(content)
+        ds = content['resource']['labels']['dataset_id']
+        proj = content['resource']['labels']['project_id']
+        if ds == 'cloud_run_tmp':
+            query = create_agg()
+            return "table created", 200
+    except:
+        pass
+    return "ok", 200
 
-    print(f"Detected change in BigQuery table: {table}")
-    return (f"Detected change in BigQuery table: {table}", 200)
+
 # [END eventarc_gcs_handler]
+
+def create_agg():
+    client = bigquery.Client()
+    query = """
+        CREATE OR REPLACE TABLE cloud_run_tmp2.created_by_trigger AS
+        SELECT
+           INSTNM, ADM_RATE_ALL, FIRST_GEN, MD_FAMINC, SAT_AVG
+        FROM
+           ch04.selective_firstgen
+        ORDER BY
+           MD_FAMINC ASC
+        LIMIT 10
+    """
+    client.query(query)
+    return query
 
 
 # [START eventarc_gcs_server]

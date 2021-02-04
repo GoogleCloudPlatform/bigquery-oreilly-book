@@ -22,7 +22,7 @@ FROM python:3.9-slim
 ENV PYTHONUNBUFFERED True
 
 # Install production dependencies.
-RUN pip install Flask==1.1.2 gunicorn==20.0.4
+RUN pip install Flask==1.1.2 gunicorn==20.0.4 google-cloud-bigquery
 
 # Copy local code to the container image.
 ENV APP_HOME /app
