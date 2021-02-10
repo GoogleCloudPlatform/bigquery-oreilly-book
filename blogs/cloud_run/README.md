@@ -1,5 +1,7 @@
 # Trigger a Cloud Run from a BigQuery event
 
+Goes with this blog post: https://cloud.google.com/blog/topics/developers-practitioners/how-trigger-cloud-run-actions-bigquery-events
+
 This shows you how to trigger a Cloud Run container whenever an insert happens into a BigQuery table.
 
 
