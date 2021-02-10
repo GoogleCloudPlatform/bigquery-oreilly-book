@@ -22,7 +22,9 @@ Source code accompanying:
 
 ## After June 2020
 Articles that update parts of the book
-* [Building SQL pipelines in BigQuery with Dataform](https://medium.com/google-cloud/building-sql-pipelines-in-bigquery-with-dataform-part-1-9e96f14ec664
+* [How to Trigger Cloud Run Actions on BigQuery Events](https://lakshmanok.medium.com/how-to-trigger-cloud-run-actions-on-bigquery-events-e818ee910560)
+* [Loading complex CSV files into BigQuery using Google Sheets](https://cloud.google.com/blog/topics/developers-practitioners/loading-complex-csv-files-bigquery-using-google-sheets)
+* [Building SQL pipelines in BigQuery with Dataform](https://medium.com/google-cloud/building-sql-pipelines-in-bigquery-with-dataform-part-1-9e96f14ec664)
 * [Validating successful execution of BigQuery scripts using ASSERT](https://medium.com/google-cloud/validating-successful-execution-of-bigquery-scripts-using-assert-c82f7ff9cfa8)
 * [RANGE_BUCKET](https://stackoverflow.com/questions/62355815/how-do-you-replace-a-value-by-its-percentile-in-bigquery)
 * [How to right-size your flat-rate and flex slots reservations in BigQuery](https://medium.com/google-cloud/how-to-move-from-on-demand-pricing-to-reservations-in-bigquery-65552cbebd45)
