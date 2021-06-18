@@ -81,7 +81,7 @@ if __name__ == '__main__':
     else:
         dataset = args.input
         dataset_contents = exec_shell_command(
-            ['bq', '--format=json', 'ls', dataset]
+            ['bq', '--format=json', 'ls', '--max_results', '10000', dataset]
         )
         dataset_contents = json.loads(dataset_contents) # array of dicts
         tables = []
@@ -94,4 +94,3 @@ if __name__ == '__main__':
 
     for table in tables:
         backup_table(dataset, table, args.output, args.schema)
-
