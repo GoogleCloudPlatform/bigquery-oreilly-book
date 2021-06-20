@@ -1,0 +1,39 @@
+{
+    "sourceFormat": "BIGTABLE",
+    "sourceUris": [
+        "https://googleapis.com/bigtable/projects/<project_id>/instances/bqbook-instance/tables/logs-table"
+    ],
+    "bigtableOptions": {
+        "columnFamilies" : [
+            {
+                "familyId": "sales",
+                "type": "STRING",
+                "encoding": "TEXT",
+                "columns" : [
+                    {
+                        "qualifierString": "itemid",
+                        "type": "STRING",
+                        "encoding": "TEXT",
+                        "onlyReadLatest": true
+                    },
+                    {
+                        "qualifierString": "price",
+                        "type": "FLOAT",
+                        "encoding": "TEXT",
+                        "onlyReadLatest": true
+                    },
+                    {
+                        "qualifierString": "qty",
+                        "type": "INTEGER",
+                        "encoding": "TEXT",
+                        "onlyReadLatest": true
+                    }
+                ],
+                "onlyReadLatest": true
+            }
+            
+        ],
+        "ignoreUnspecifiedColumnFamilies": true,
+        "readRowkeyAsString": true
+    }
+}
