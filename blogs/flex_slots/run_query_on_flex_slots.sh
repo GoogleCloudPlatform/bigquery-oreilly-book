@@ -63,7 +63,7 @@ ASSIGNMENT=$((bq mk --reservation_assignment --reservation_id=${PROJECT}:${LOCAT
 echo ${ASSIGNMENT}
 
 # give the slots about 30 s to get setup
-sleep 30
+sleep 120
 
 run_query || true
 
