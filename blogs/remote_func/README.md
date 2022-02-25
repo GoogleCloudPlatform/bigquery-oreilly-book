@@ -1,14 +1,18 @@
 
 ## Instructions
 
+Accompanies blog post
+https://medium.com/@lakshmanok/remote-functions-in-bigquery-af9921498438
+
 * Visit https://console.developers.google.com/apis/api/bigqueryconnection.googleapis.com/
 * Enable the BigQuery Connection API
 
 * In CloudShell
-  * gcloud components update
-  * bq show blogs || bq mk -d blogs
-  * bq mk --connection --display_name='add_fake_user' --connection_type=CLOUD_RESOURCE --project_id=$(gcloud config get-value project) --location=US  gcf-conn
-  * bq show --location=US --connection gcf-conn
+  ```
+  gcloud components update
+  bq mk --connection --display_name='add_fake_user' --connection_type=CLOUD_RESOURCE --project_id=$(gcloud config get-value project) --location=US  gcf-conn
+  bq show --location=US --connection gcf-conn
+  ```
   * Make sure to note the service account id
 
 * Visit https://console.cloud.google.com/functions
@@ -59,6 +63,8 @@
   * Add the serviceAccountID as a Cloud Function Invoker
 
 * Now go to BigQuery console https://console.cloud.google.com/bigquery
+
+* If necessary, create a dataset called 'blogs'
 
 * Create a SQL function that in turn will invoke the Cloud Function (note the two places to change)
     ```
