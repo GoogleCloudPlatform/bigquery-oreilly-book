@@ -1,8 +1,0 @@
-gcloud components update
-
-bq mk --connection --display_name='add_fake_user' --connection_type=CLOUD_RESOURCE --project_id=$(gcloud config get-value project) --location=US  gcf-conn
-
-
-
-bq show --location=US --connection gcf-conn
-
