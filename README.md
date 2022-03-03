@@ -29,7 +29,7 @@ Articles that update parts of the book
 * [Anomaly detection in time series data using BigQuery ML](https://lakshmanok.medium.com/anomaly-detection-in-time-series-data-using-bigquery-ml-b70e10a9f3ff)
 * [Hyperparameter tuning BigQuery ML: BigQuery ML can use Vertex AI to tune common model parameters](https://medium.com/google-cloud/hyperparameter-tuning-directly-within-bigquery-ml-a0affb0991ae)
 * [Quickly create BigQuery demo/dev environments using SQL](https://lakshmanok.medium.com/quickly-create-bigquery-demo-dev-environments-using-sql-b14f734f7f96)
-* [PIVOT in BigQuery] (https://towardsdatascience.com/pivot-in-bigquery-4eefde28b3be)
+* [PIVOT in BigQuery](https://towardsdatascience.com/pivot-in-bigquery-4eefde28b3be)
 * [Speeding up small queries in BigQuery with BI Engine](https://lakshmanok.medium.com/speeding-up-small-queries-in-bigquery-with-bi-engine-4ac8420a2ef0)
 * [How to Trigger Cloud Run Actions on BigQuery Events](https://lakshmanok.medium.com/how-to-trigger-cloud-run-actions-on-bigquery-events-e818ee910560)
 * [Loading complex CSV files into BigQuery using Google Sheets](https://cloud.google.com/blog/topics/developers-practitioners/loading-complex-csv-files-bigquery-using-google-sheets)
