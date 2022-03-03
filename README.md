@@ -22,6 +22,15 @@ Source code accompanying:
 
 ## After June 2020
 Articles that update parts of the book
+* [Remote Functions in BigQuery] (https://towardsdatascience.com/remote-functions-in-bigquery-af9921498438)
+* [Working with JSON data in BigQuery] (https://medium.com/google-cloud/working-with-json-data-in-bigquery-24ca8fd6e90c)
+* [An Agile Architecture for Analytics and AI on Google Cloud] (https://medium.com/google-cloud/an-agile-architecture-for-analytics-and-ai-on-google-cloud-6415e692591f)
+* [Explaining a BigQuery ML model] (https://lakshmanok.medium.com/explaining-a-bigquery-ml-model-5cf8d9636ec9)
+* [Anomaly detection in time series data using BigQuery ML] (https://lakshmanok.medium.com/anomaly-detection-in-time-series-data-using-bigquery-ml-b70e10a9f3ff)
+* [Hyperparameter tuning BigQuery ML: BigQuery ML can use Vertex AI to tune common model parameters] (https://medium.com/google-cloud/hyperparameter-tuning-directly-within-bigquery-ml-a0affb0991ae)
+* [Quickly create BigQuery demo/dev environments using SQL] (https://lakshmanok.medium.com/quickly-create-bigquery-demo-dev-environments-using-sql-b14f734f7f96)
+* [PIVOT in BigQuery] (https://towardsdatascience.com/pivot-in-bigquery-4eefde28b3be)
+* [Speeding up small queries in BigQuery with BI Engine] (https://lakshmanok.medium.com/speeding-up-small-queries-in-bigquery-with-bi-engine-4ac8420a2ef0)
 * [How to Trigger Cloud Run Actions on BigQuery Events](https://lakshmanok.medium.com/how-to-trigger-cloud-run-actions-on-bigquery-events-e818ee910560)
 * [Loading complex CSV files into BigQuery using Google Sheets](https://cloud.google.com/blog/topics/developers-practitioners/loading-complex-csv-files-bigquery-using-google-sheets)
 * [Building SQL pipelines in BigQuery with Dataform](https://medium.com/google-cloud/building-sql-pipelines-in-bigquery-with-dataform-part-1-9e96f14ec664)
