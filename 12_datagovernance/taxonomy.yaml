@@ -1,0 +1,14 @@
+taxonomies:
+  - displayName: user_pii_taxonomy
+    policyTags:
+      - childPolicyTags:
+          - displayName: physical_measurement
+          - childPolicyTags:
+              - displayName: age_group
+              - displayName: gender
+              - childPolicyTags:
+                  - displayName: city
+                  - displayName: userid
+                displayName: category_1
+            displayName: category_2
+        displayName: category_3
