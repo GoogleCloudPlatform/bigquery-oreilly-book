@@ -260,21 +260,12 @@ def record_lineage(source_name, target_name, start_time, end_time):
         parent=parent,
     )
 
-    links = dl_client.search_links(request=search_req)
+    links = list(dl_client.search_links(request=search_req))
 
-    found_links = False
-    
-    for link in links:
-        print(link)
-        found_links = True
-        link_id = link.name
-        print('link_id:', link_id)
-        
-    if found_links == True:
+    if len(links) > 0:
+        link_id = links[0].name
         process = retrieve_process(parent, link_id)
-        print('process:', process)
     else:
-        # record the process, run, and links
         process = create_process(parent)
         print('process:', process)
         
@@ -442,4 +433,7 @@ def append_device_activity_hourly_age_group_summarized(previous_hour):
 
     
 if __name__ == '__main__':
-    run_controller()
+    #run_controller()
+    source_name = 'postgres:pgfit.device_events.ar'
+    target_name = 'gs://fit-device-events-ar/device_events_ar/*'
+    record_lineage(source_name, target_name, None, None)
